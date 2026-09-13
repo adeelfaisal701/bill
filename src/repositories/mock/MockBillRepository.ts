@@ -9,7 +9,24 @@ const BILL_TYPES_KEY = "billTypes";
 const GLOBAL_BILL_NUMBER_KEY = "globalBillNumber";
 
 function loadBills(): Bill[] {
-  return readAll<Bill[]>(BILLS_KEY, SEED_BILLS);
+  const bills = readAll<Bill[]>(BILLS_KEY, SEED_BILLS);
+  let migrated = false;
+  const migratedBills = bills.map(bill => {
+    if (!bill.paymentStatus) {
+      migrated = true;
+      return { ...bill, paymentStatus: "pending" as const };
+    }
+    // Also normalize any old capitalized statuses
+    if (bill.paymentStatus === "Pending" || bill.paymentStatus === "Paid") {
+      migrated = true;
+      return { ...bill, paymentStatus: bill.paymentStatus.toLowerCase() as any };
+    }
+    return bill;
+  });
+  if (migrated) {
+    saveBills(migratedBills);
+  }
+  return migratedBills;
 }
 function saveBills(bills: Bill[]): void {
   writeAll(BILLS_KEY, bills);
@@ -76,7 +93,7 @@ export class MockBillRepository implements BillRepository {
       totalAmount: subtotal,
       notes: input.notes?.trim() || undefined,
       status: "saved",
-      paymentStatus: input.paymentStatus ?? "Pending",
+      paymentStatus: input.paymentStatus ?? "pending",
       createdAt: now,
       updatedAt: now,
     };

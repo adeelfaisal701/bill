@@ -39,3 +39,39 @@ export function greeting(date = new Date()): string {
   if (hour < 17) return "Good Afternoon";
   return "Good Evening";
 }
+
+export function isThisWeek(iso: string): boolean {
+  const d = new Date(iso);
+  const today = new Date();
+  
+  // Get start of week (Sunday)
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  // Get end of week (Saturday)
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
+  
+  return d >= startOfWeek && d <= endOfWeek;
+}
+
+export function isThisMonth(iso: string): boolean {
+  const d = new Date(iso);
+  const today = new Date();
+  return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
+}
+
+export function isWithinRange(iso: string, start: string, end: string): boolean {
+  if (!start || !end) return false;
+  const d = new Date(iso);
+  
+  const startDate = new Date(start);
+  startDate.setHours(0, 0, 0, 0);
+  
+  const endDate = new Date(end);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return d >= startDate && d <= endDate;
+}

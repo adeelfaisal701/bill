@@ -25,9 +25,9 @@ export function BillCard({ bill, onTogglePaymentStatus }: { bill: Bill, onToggle
                 if (onTogglePaymentStatus) onTogglePaymentStatus(bill);
               }}
               className="ml-auto sm:ml-0 cursor-pointer rounded-full focus-ring focus:outline-none focus-visible:ring-2"
-              aria-label={`Mark as ${bill.paymentStatus === "Paid" ? "Pending" : "Paid"}`}
+              aria-label={`Mark as ${bill.paymentStatus === "paid" ? "pending" : "paid"}`}
             >
-              <Badge tone={bill.paymentStatus === "Paid" ? "success" : "neutral"} className="hover:opacity-80">
+              <Badge tone={bill.paymentStatus === "paid" ? "success" : "neutral"} className="hover:opacity-80 capitalize">
                 {bill.paymentStatus}
               </Badge>
             </button>

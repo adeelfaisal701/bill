@@ -16,7 +16,7 @@ import { filterBills } from "@/services/billService";
 import type { BillTypeId } from "@/types/bill";
 
 export default function BillsPage() {
-  const { bills, loading, error, reload } = useBills();
+  const { bills, loading, error, reload, updateBillInState } = useBills();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [billType, setBillType] = useState<BillTypeId | "all">("all");
@@ -25,6 +25,19 @@ export default function BillsPage() {
     () => filterBills(bills, { query, billType }),
     [bills, query, billType]
   );
+
+  async function handleTogglePaymentStatus(bill: any) {
+    try {
+      const newStatus = bill.paymentStatus === "paid" ? "pending" : "paid";
+      updateBillInState(bill.id, { paymentStatus: newStatus });
+      await import("@/services/billService").then(m => m.updateBill(bill.id, { paymentStatus: newStatus }));
+      // Optional background refresh
+      // reload(); 
+    } catch (err) {
+      console.error(err);
+      reload();
+    }
+  }
 
   return (
     <div>
@@ -55,7 +68,7 @@ export default function BillsPage() {
       </div>
 
       <div className="mt-4 px-4 sm:px-6">
-        {loading ? (
+        {(loading && bills.length === 0) ? (
           <LoadingState rows={4} />
         ) : error ? (
           <ErrorState message={error} onRetry={reload} />
@@ -78,7 +91,7 @@ export default function BillsPage() {
         ) : (
           <div className="space-y-3 pb-4">
             {filtered.map((b) => (
-              <BillCard key={b.id} bill={b} />
+              <BillCard key={b.id} bill={b} onTogglePaymentStatus={handleTogglePaymentStatus} />
             ))}
           </div>
         )}

@@ -20,7 +20,7 @@ export interface BillItem {
 
 export type BillStatus = "draft" | "saved";
 
-export type PaymentStatus = "Pending" | "Paid";
+export type PaymentStatus = "pending" | "paid";
 
 export interface Bill {
   id: string;

@@ -1,6 +1,7 @@
 import { repositories } from "@/repositories";
 import type { Bill, BillFilters, CreateBillInput, UpdateBillInput } from "@/types/bill";
-import { isSameDay } from "@/lib/utilities";
+import type { Product } from "@/types/product";
+import { isSameDay, isThisWeek, isThisMonth, isWithinRange } from "@/lib/utilities";
 import { validateBillDraft } from "@/lib/validation";
 
 export async function listBills(): Promise<Bill[]> {
@@ -131,10 +132,10 @@ export function computeDashboardStats(bills: Bill[]): DashboardStats {
   
   const totalSales = savedBills.reduce((sum, b) => sum + b.totalAmount, 0);
   const totalReceived = savedBills
-    .filter(b => b.paymentStatus === "Paid")
+    .filter(b => b.paymentStatus === "paid")
     .reduce((sum, b) => sum + b.totalAmount, 0);
   const totalPending = savedBills
-    .filter(b => b.paymentStatus === "Pending")
+    .filter(b => b.paymentStatus === "pending")
     .reduce((sum, b) => sum + b.totalAmount, 0);
 
   return {
@@ -142,6 +143,63 @@ export function computeDashboardStats(bills: Bill[]): DashboardStats {
     todaysBillCount: todaysBills.length,
     recentBills,
     totalSales,
+    totalReceived,
+    totalPending,
+  };
+}
+
+export interface SalesOverviewStats {
+  totalSales: number;
+  totalProfit: number;
+  totalReceived: number;
+  totalPending: number;
+}
+
+export type SalesPeriod = "week" | "month" | "custom";
+
+export function computeSalesOverview(
+  bills: Bill[],
+  products: Product[],
+  period: SalesPeriod,
+  customRange?: { start: string; end: string }
+): SalesOverviewStats {
+  let filteredBills = bills.filter((b) => b.status === "saved");
+
+  if (period === "week") {
+    filteredBills = filteredBills.filter((b) => isThisWeek(b.date));
+  } else if (period === "month") {
+    filteredBills = filteredBills.filter((b) => isThisMonth(b.date));
+  } else if (period === "custom" && customRange?.start && customRange?.end) {
+    filteredBills = filteredBills.filter((b) =>
+      isWithinRange(b.date, customRange.start, customRange.end)
+    );
+  }
+
+  const totalSales = filteredBills.reduce((sum, b) => sum + b.totalAmount, 0);
+  
+  let totalProfit = 0;
+  for (const bill of filteredBills) {
+    for (const item of bill.items) {
+      if (item.productId) {
+        const product = products.find((p) => p.id === item.productId);
+        if (product && product.costPrice !== undefined) {
+          totalProfit += (item.rate - product.costPrice) * item.quantity;
+        }
+      }
+    }
+  }
+
+  const totalReceived = filteredBills
+    .filter((b) => b.paymentStatus === "paid")
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+
+  const totalPending = filteredBills
+    .filter((b) => b.paymentStatus === "pending")
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+
+  return {
+    totalSales,
+    totalProfit,
     totalReceived,
     totalPending,
   };

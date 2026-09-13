@@ -14,8 +14,8 @@ export const SEED_BILL_TYPES: BillType[] = [
 ];
 
 export const SEED_PRODUCTS: Product[] = [
-  { id: "p_cement", name: "Cement", stockQuantity: 50, isActive: true, createdAt: daysAgo(30), updatedAt: daysAgo(30) },
-  { id: "p_steel", name: "Steel Rod", stockQuantity: 100, isActive: true, createdAt: daysAgo(28), updatedAt: daysAgo(28) },
+  { id: "p_cement", name: "Cement", costPrice: 1200, stockQuantity: 50, isActive: true, createdAt: daysAgo(30), updatedAt: daysAgo(30) },
+  { id: "p_steel", name: "Steel Rod", costPrice: 1100, stockQuantity: 100, isActive: true, createdAt: daysAgo(28), updatedAt: daysAgo(28) },
   { id: "p_bricks", name: "Bricks", stockQuantity: 500, isActive: false, createdAt: daysAgo(20), updatedAt: daysAgo(5) },
   { id: "p_sand", name: "Sand (per truck)", stockQuantity: 10, isActive: true, createdAt: daysAgo(15), updatedAt: daysAgo(15) },
 ];
@@ -41,7 +41,7 @@ export const SEED_BILLS: Bill[] = [
     subtotal: 12000,
     totalAmount: 12000,
     status: "saved",
-    paymentStatus: "Paid",
+    paymentStatus: "paid",
     createdAt: daysAgo(1),
     updatedAt: daysAgo(1),
   },
@@ -74,7 +74,7 @@ export const SEED_BILLS: Bill[] = [
     subtotal: 18500,
     totalAmount: 18500,
     status: "saved",
-    paymentStatus: "Pending",
+    paymentStatus: "pending",
     createdAt: daysAgo(0),
     updatedAt: daysAgo(0),
   },

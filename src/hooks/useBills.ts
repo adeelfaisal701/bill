@@ -26,5 +26,9 @@ export function useBills() {
     reload();
   }, [reload]);
 
-  return { bills, loading, error, reload };
+  const updateBillInState = useCallback((id: string, patch: Partial<Bill>) => {
+    setBills((prev) => prev.map(b => b.id === id ? { ...b, ...patch } : b));
+  }, []);
+
+  return { bills, loading, error, reload, updateBillInState };
 }

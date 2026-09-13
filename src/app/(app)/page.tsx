@@ -9,27 +9,47 @@ import { BillCard } from "@/components/bills/BillCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useBills } from "@/hooks/useBills";
+import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
-import { computeDashboardStats } from "@/services/billService";
-import { formatCurrency, greeting } from "@/lib/utilities";
+import { computeDashboardStats, computeSalesOverview, type SalesPeriod } from "@/services/billService";
+import { formatCurrency, greeting, todayIso } from "@/lib/utilities";
 
 export default function HomePage() {
   const { user } = useAuth();
-  const { bills, loading, error, reload } = useBills();
+  const { bills, loading: billsLoading, error, reload, updateBillInState } = useBills();
+  const { products, loading: productsLoading } = useProducts();
   const router = useRouter();
 
+  const [period, setPeriod] = useState<SalesPeriod>("week");
+  const [customRange, setCustomRange] = useState({ start: todayIso().split("T")[0], end: todayIso().split("T")[0] });
+
   const stats = computeDashboardStats(bills);
+  const salesOverview = computeSalesOverview(bills, products, period, customRange);
+
+  const initialLoading = (billsLoading && bills.length === 0) || (productsLoading && products.length === 0);
 
   async function handleTogglePaymentStatus(bill: any) {
     try {
-      const newStatus = bill.paymentStatus === "Paid" ? "Pending" : "Paid";
-      // Update directly via the bill service
-      await import("@/services/billService").then(m => m.updateBill(bill.id, { paymentStatus: newStatus }));
-      reload(); // refresh bills
+      const newStatus = bill.paymentStatus === "paid" ? "pending" : "paid";
+      
+      // 1. Optimistic instant update in main state
+      updateBillInState(bill.id, { paymentStatus: newStatus });
+
+      // 2. Persist to local storage
+      const { updateBill } = await import("@/services/billService");
+      await updateBill(bill.id, { paymentStatus: newStatus });
+      
+      // 3. Background refresh not strictly needed for instant UI, but good to sync
+      // We don't call reload() here because it sets loading=true and we want to keep
+      // the UI perfectly snappy without background loader flashes if possible, 
+      // but to ensure sync, we just let the optimistic update stay.
     } catch (err) {
       console.error(err);
+      // Optional: on error we could revert, but a full reload is safer
+      reload();
     }
   }
 
@@ -59,26 +79,63 @@ export default function HomePage() {
         </div>
 
         <div className="mt-4 rounded-2xl border border-ink-100 bg-white p-5 shadow-card">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-400">
-            Payment Tracking
-          </h2>
-          <div className="flex items-center justify-between">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-400">
+              Sales Overview
+            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value as SalesPeriod)}
+                className="rounded-lg border border-ink-200 bg-ink-50 px-3 py-1.5 text-sm font-medium text-ink-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              >
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              {period === "custom" && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={customRange.start}
+                    onChange={(e) => setCustomRange((prev) => ({ ...prev, start: e.target.value }))}
+                    className="rounded-lg border border-ink-200 bg-ink-50 px-2 py-1 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  />
+                  <span className="text-ink-400">-</span>
+                  <input
+                    type="date"
+                    value={customRange.end}
+                    onChange={(e) => setCustomRange((prev) => ({ ...prev, end: e.target.value }))}
+                    className="rounded-lg border border-ink-200 bg-ink-50 px-2 py-1 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-between sm:gap-0">
             <div>
               <p className="text-sm font-medium text-ink-500">Total Sales</p>
               <p className="mt-1 font-mono text-lg font-bold text-ink-900">
-                {formatCurrency(stats.totalSales)}
+                {formatCurrency(salesOverview.totalSales)}
               </p>
             </div>
-            <div className="text-right">
+            <div>
+              <p className="text-sm font-medium text-brand-600">Total Profit</p>
+              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+                {formatCurrency(salesOverview.totalProfit)}
+              </p>
+            </div>
+            <div className="sm:text-right">
               <p className="text-sm font-medium text-success">Received</p>
               <p className="mt-1 font-mono text-lg font-bold text-ink-900">
-                {formatCurrency(stats.totalReceived)}
+                {formatCurrency(salesOverview.totalReceived)}
               </p>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <p className="text-sm font-medium text-danger">Pending</p>
               <p className="mt-1 font-mono text-lg font-bold text-ink-900">
-                {formatCurrency(stats.totalPending)}
+                {formatCurrency(salesOverview.totalPending)}
               </p>
             </div>
           </div>
@@ -103,7 +160,7 @@ export default function HomePage() {
           )}
         </div>
 
-        {loading ? (
+        {initialLoading ? (
           <LoadingState rows={3} />
         ) : error ? (
           <ErrorState message={error} onRetry={reload} />
