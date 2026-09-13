@@ -15,6 +15,7 @@ export interface BillItem {
   productNameSnapshot: string;
   quantity: number;
   rate: number;
+  costPrice?: number;
   amount: number;
 }
 
@@ -46,6 +47,7 @@ export interface CreateBillItemInput {
   productNameSnapshot: string;
   quantity: number;
   rate: number;
+  costPrice?: number;
 }
 
 export interface CreateBillInput {
@@ -65,6 +67,7 @@ export interface UpdateBillItemInput {
   productNameSnapshot: string;
   quantity: number;
   rate: number;
+  costPrice?: number;
 }
 
 export interface UpdateBillInput {

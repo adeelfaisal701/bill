@@ -111,7 +111,7 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
 
   return (
     <article className="bill-sheet reference-sheet" aria-label="SHAREEF TRADERS bill invoice">
-      <div className="reference-page" style={{ backgroundImage: "url('/Al Shareef.jpg')" }} aria-hidden="true" />
+      <div className="reference-page" style={{ backgroundImage: "url('/Al Shareef.png')" }} aria-hidden="true" />
       <div className="reference-overlay">
         <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
         <div className="reference-field" style={{ ...cfg.place }}>{lineTwo}</div>

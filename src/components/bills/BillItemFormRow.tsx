@@ -12,6 +12,7 @@ export interface DraftBillItem {
   productNameSnapshot: string;
   quantity: number;
   rate: number;
+  costPrice?: number;
 }
 
 export function BillItemFormRow({
@@ -42,6 +43,7 @@ export function BillItemFormRow({
               onChange({
                 productId,
                 productNameSnapshot: product?.name ?? "",
+                costPrice: product?.costPrice,
               });
             }}
             options={[

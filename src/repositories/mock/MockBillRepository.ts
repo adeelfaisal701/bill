@@ -75,6 +75,7 @@ export class MockBillRepository implements BillRepository {
       productNameSnapshot: item.productNameSnapshot,
       quantity: item.quantity,
       rate: item.rate,
+      costPrice: typeof item.costPrice === "number" && !Number.isNaN(item.costPrice) ? item.costPrice : undefined,
       amount: Math.round(item.quantity * item.rate * 100) / 100,
     }));
 
@@ -124,6 +125,9 @@ export class MockBillRepository implements BillRepository {
         productNameSnapshot: item.productNameSnapshot,
         quantity: item.quantity,
         rate: item.rate,
+        costPrice: typeof item.costPrice === "number" && !Number.isNaN(item.costPrice)
+          ? item.costPrice
+          : existing.items.find((existingItem) => existingItem.id === item.id)?.costPrice,
         amount: Math.round(item.quantity * item.rate * 100) / 100,
       }));
       subtotal = updatedItems.reduce((sum, i) => sum + i.amount, 0);

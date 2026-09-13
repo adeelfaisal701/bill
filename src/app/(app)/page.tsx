@@ -126,6 +126,12 @@ export default function HomePage() {
                 {formatCurrency(salesOverview.totalProfit)}
               </p>
             </div>
+            <div>
+              <p className="text-sm font-medium text-ink-500">Total Cost</p>
+              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+                {formatCurrency(salesOverview.totalCost)}
+              </p>
+            </div>
             <div className="sm:text-right">
               <p className="text-sm font-medium text-success">Received</p>
               <p className="mt-1 font-mono text-lg font-bold text-ink-900">

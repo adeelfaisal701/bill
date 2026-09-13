@@ -32,6 +32,7 @@ export class MockProductRepository implements ProductRepository {
     const product: Product = {
       id: generateId("prod"),
       name: input.name.trim(),
+      costPrice: typeof input.costPrice === "number" && !Number.isNaN(input.costPrice) ? input.costPrice : undefined,
       stockQuantity: input.stockQuantity,
       isActive: true,
       createdAt: now,
@@ -51,6 +52,9 @@ export class MockProductRepository implements ProductRepository {
       ...products[idx],
       ...patch,
       name: patch.name?.trim() ?? products[idx].name,
+      costPrice: typeof patch.costPrice === "number" && !Number.isNaN(patch.costPrice)
+        ? patch.costPrice
+        : products[idx].costPrice,
       stockQuantity: patch.stockQuantity ?? products[idx].stockQuantity,
       updatedAt: new Date().toISOString(),
     };

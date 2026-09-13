@@ -18,7 +18,7 @@ export function validateProductName(
 
 export function validateBillDraft(input: {
   partyName: string;
-  items: { productNameSnapshot: string; quantity: number; rate: number }[];
+  items: { productNameSnapshot: string; quantity: number; rate: number; costPrice?: number }[];
 }): FieldErrors {
   const errors: FieldErrors = {};
   if (!input.partyName.trim()) errors.partyName = "Party name is required.";
@@ -28,7 +28,10 @@ export function validateBillDraft(input: {
     input.items.forEach((item, idx) => {
       if (!item.productNameSnapshot.trim()) errors[`item-${idx}`] = "Select a product.";
       else if (item.quantity <= 0) errors[`item-${idx}`] = "Quantity must be greater than 0.";
-      else if (item.rate < 0) errors[`item-${idx}`] = "Rate cannot be negative.";
+      else if (item.rate < 0) errors[`item-${idx}`] = "Selling price cannot be negative.";
+      else if (typeof item.costPrice === "number" && (Number.isNaN(item.costPrice) || item.costPrice < 0)) {
+        errors[`item-${idx}`] = "Cost price must be a valid non-negative number.";
+      }
     });
   }
   return errors;

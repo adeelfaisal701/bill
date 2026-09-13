@@ -78,6 +78,7 @@ export default function CreateBillFoundationPage({
       productNameSnapshot: item.productNameSnapshot,
       quantity: item.quantity,
       rate: item.rate,
+      costPrice: item.costPrice,
       amount: Math.max(0, item.quantity) * Math.max(0, item.rate),
     })),
     subtotal,
@@ -130,6 +131,7 @@ export default function CreateBillFoundationPage({
           productNameSnapshot: i.productNameSnapshot,
           quantity: i.quantity,
           rate: i.rate,
+          costPrice: i.costPrice,
         })),
       });
       show("Bill saved successfully.", "success");

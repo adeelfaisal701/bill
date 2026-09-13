@@ -19,6 +19,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const { products, loading } = useProducts();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
   const [name, setName] = useState("");
+  const [costPrice, setCostPrice] = useState("");
   const [addStock, setAddStock] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -27,7 +28,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     if (loading) return;
     const p = products.find((x) => x.id === id) ?? null;
     setProduct(p);
-    if (p) setName(p.name);
+    if (p) {
+      setName(p.name);
+      setCostPrice(p.costPrice !== undefined ? String(p.costPrice) : "");
+    }
   }, [loading, products, id]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -35,13 +39,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setSaving(true);
     try {
       const addedStock = addStock ? Number(addStock) : 0;
+      const parsedCostPrice = costPrice === "" ? undefined : Number(costPrice);
       if (isNaN(addedStock) || addedStock < 0) {
         throw new Error("Add stock must be a valid positive number.");
+      }
+      if (costPrice !== "" && (isNaN(parsedCostPrice!) || parsedCostPrice! < 0)) {
+        throw new Error("Cost price must be a valid number.");
       }
       
       const newStockQuantity = (product?.stockQuantity ?? 0) + addedStock;
       
-      await productService.updateProduct(id, { name, stockQuantity: newStockQuantity }, products);
+      await productService.updateProduct(id, { name, costPrice: parsedCostPrice, stockQuantity: newStockQuantity }, products);
       show("Product updated successfully.", "success");
       router.push("/products");
     } catch (err) {
@@ -74,6 +82,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <span className="text-sm font-medium text-ink-700">Current Stock</span>
               <span className="text-lg font-semibold text-ink-900">{product.stockQuantity ?? 0} Pieces</span>
             </div>
+            <Input
+              label="Cost Price"
+              type="number"
+              placeholder="Enter cost price"
+              value={costPrice}
+              onChange={(e) => { setCostPrice(e.target.value); setError(""); }}
+              min="0"
+            />
             <Input
               label="Add Stock"
               type="number"

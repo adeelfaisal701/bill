@@ -15,6 +15,7 @@ export default function AddProductPage() {
   const { show } = useToast();
   const { products } = useProducts();
   const [name, setName] = useState("");
+  const [costPrice, setCostPrice] = useState("");
   const [stockQuantity, setStockQuantity] = useState("0");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -24,10 +25,14 @@ export default function AddProductPage() {
     setSaving(true);
     try {
       const parsedStock = Number(stockQuantity);
+      const parsedCostPrice = costPrice === "" ? undefined : Number(costPrice);
       if (isNaN(parsedStock) || parsedStock < 0) {
         throw new Error("Stock quantity must be a valid number.");
       }
-      await productService.createProduct({ name, stockQuantity: parsedStock }, products);
+      if (costPrice !== "" && (isNaN(parsedCostPrice!) || parsedCostPrice! < 0)) {
+        throw new Error("Cost price must be a valid number.");
+      }
+      await productService.createProduct({ name, costPrice: parsedCostPrice, stockQuantity: parsedStock }, products);
       show("Product added successfully.", "success");
       router.push("/products");
     } catch (err) {
@@ -51,6 +56,14 @@ export default function AddProductPage() {
               error={error}
               onChange={(e) => { setName(e.target.value); setError(""); }}
               autoFocus
+            />
+            <Input
+              label="Cost Price"
+              type="number"
+              placeholder="Enter cost price"
+              value={costPrice}
+              onChange={(e) => { setCostPrice(e.target.value); setError(""); }}
+              min="0"
             />
             <Input
               label="Stock Quantity"

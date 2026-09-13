@@ -43,6 +43,7 @@ export async function createBill(input: CreateBillInput): Promise<Bill> {
       productNameSnapshot: i.productNameSnapshot,
       quantity: i.quantity,
       rate: i.rate,
+      costPrice: i.costPrice,
     })),
   });
   if (Object.keys(errors).length > 0) {
@@ -150,6 +151,7 @@ export function computeDashboardStats(bills: Bill[]): DashboardStats {
 
 export interface SalesOverviewStats {
   totalSales: number;
+  totalCost: number;
   totalProfit: number;
   totalReceived: number;
   totalPending: number;
@@ -176,15 +178,21 @@ export function computeSalesOverview(
   }
 
   const totalSales = filteredBills.reduce((sum, b) => sum + b.totalAmount, 0);
+  const totalCost = filteredBills.reduce((sum, b) => sum + b.items.reduce((itemSum, item) => {
+    if (typeof item.costPrice === "number" && !Number.isNaN(item.costPrice)) {
+      return itemSum + item.costPrice * item.quantity;
+    }
+    return itemSum;
+  }, 0), 0);
   
   let totalProfit = 0;
   for (const bill of filteredBills) {
     for (const item of bill.items) {
-      if (item.productId) {
-        const product = products.find((p) => p.id === item.productId);
-        if (product && product.costPrice !== undefined) {
-          totalProfit += (item.rate - product.costPrice) * item.quantity;
-        }
+      const validCostPrice = typeof item.costPrice === "number" && !Number.isNaN(item.costPrice)
+        ? item.costPrice
+        : undefined;
+      if (validCostPrice !== undefined) {
+        totalProfit += (item.rate - validCostPrice) * item.quantity;
       }
     }
   }
@@ -199,6 +207,7 @@ export function computeSalesOverview(
 
   return {
     totalSales,
+    totalCost,
     totalProfit,
     totalReceived,
     totalPending,
