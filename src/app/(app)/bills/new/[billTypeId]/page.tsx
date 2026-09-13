@@ -84,6 +84,7 @@ export default function CreateBillFoundationPage({
     totalAmount: subtotal,
     notes: notes || undefined,
     status: "draft",
+    paymentStatus: "pending",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }), [billType, date, items, nextBillNumber, notes, partyAddress, partyName, partyPhone, subtotal]);

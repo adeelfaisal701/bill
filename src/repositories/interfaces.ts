@@ -4,7 +4,7 @@
 // implementation returned by repositories/index.ts and nothing else in
 // the app needs to change.
 
-import type { Bill, BillType, BillTypeId, CreateBillInput } from "@/types/bill";
+import type { Bill, BillType, BillTypeId, CreateBillInput, UpdateBillInput } from "@/types/bill";
 import type { CreateProductInput, Product, UpdateProductInput } from "@/types/product";
 import type { BusinessProfile } from "@/types/business";
 import type { AppUser } from "@/types/user";

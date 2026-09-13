@@ -17,9 +17,10 @@ function loadBills(): Bill[] {
       return { ...bill, paymentStatus: "pending" as const };
     }
     // Also normalize any old capitalized statuses
-    if (bill.paymentStatus === "Pending" || bill.paymentStatus === "Paid") {
+    const rawStatus = bill.paymentStatus as string;
+    if (rawStatus === "Pending" || rawStatus === "Paid") {
       migrated = true;
-      return { ...bill, paymentStatus: bill.paymentStatus.toLowerCase() as any };
+      return { ...bill, paymentStatus: rawStatus.toLowerCase() as Bill["paymentStatus"] };
     }
     return bill;
   });

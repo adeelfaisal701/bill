@@ -23,6 +23,9 @@ export class FirebaseBillRepository implements BillRepository {
   async createBill(): Promise<never> {
     throw new CloudNotConfiguredError("Cloud bill sync");
   }
+  async updateBill(): Promise<never> {
+    throw new CloudNotConfiguredError("Cloud bill sync");
+  }
   async deleteBill(): Promise<never> {
     throw new CloudNotConfiguredError("Cloud bill sync");
   }
