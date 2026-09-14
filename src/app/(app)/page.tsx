@@ -113,34 +113,34 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-between sm:gap-0">
-            <div>
-              <p className="text-sm font-medium text-ink-500">Total Sales</p>
-              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-4">
+            <div className="rounded-xl bg-ink-50 p-3.5 transition-colors hover:bg-ink-100">
+              <p className="text-xs font-medium text-ink-500 uppercase tracking-wider">Total Sales</p>
+              <p className="mt-1.5 font-mono text-lg font-bold text-ink-900">
                 {formatCurrency(salesOverview.totalSales)}
               </p>
             </div>
-            <div>
-              <p className="text-sm font-medium text-brand-600">Total Profit</p>
-              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+            <div className="rounded-xl bg-brand-50 border border-brand-100 p-3.5 shadow-sm">
+              <p className="text-xs font-medium text-brand-600 uppercase tracking-wider">Total Profit</p>
+              <p className="mt-1.5 font-mono text-lg font-bold text-brand-800">
                 {formatCurrency(salesOverview.totalProfit)}
               </p>
             </div>
-            <div>
-              <p className="text-sm font-medium text-ink-500">Total Cost</p>
-              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+            <div className="rounded-xl bg-ink-50 p-3.5 transition-colors hover:bg-ink-100">
+              <p className="text-xs font-medium text-ink-500 uppercase tracking-wider">Total Cost</p>
+              <p className="mt-1.5 font-mono text-lg font-bold text-ink-900">
                 {formatCurrency(salesOverview.totalCost)}
               </p>
             </div>
-            <div className="sm:text-right">
-              <p className="text-sm font-medium text-success">Received</p>
-              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+            <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3.5 shadow-sm">
+              <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider">Received</p>
+              <p className="mt-1.5 font-mono text-lg font-bold text-emerald-800">
                 {formatCurrency(salesOverview.totalReceived)}
               </p>
             </div>
-            <div className="sm:text-right">
-              <p className="text-sm font-medium text-danger">Pending</p>
-              <p className="mt-1 font-mono text-lg font-bold text-ink-900">
+            <div className="col-span-2 sm:col-span-1 rounded-xl bg-rose-50 border border-rose-100 p-3.5 shadow-sm">
+              <p className="text-xs font-medium text-rose-700 uppercase tracking-wider">Pending</p>
+              <p className="mt-1.5 font-mono text-lg font-bold text-rose-800">
                 {formatCurrency(salesOverview.totalPending)}
               </p>
             </div>
