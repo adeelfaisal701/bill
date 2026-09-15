@@ -18,11 +18,11 @@ export function BottomNavigation() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-surface/95 backdrop-blur md:hidden"
+      className="mobile-bottom-navigation fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-surface/95 backdrop-blur md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {ITEMS.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -31,7 +31,7 @@ export function BottomNavigation() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors focus-ring",
+                  "flex min-w-0 flex-col items-center gap-1 whitespace-nowrap py-2.5 text-[11px] font-medium transition-colors focus-ring",
                   active ? "text-brand-600" : "text-ink-400"
                 )}
                 aria-current={active ? "page" : undefined}

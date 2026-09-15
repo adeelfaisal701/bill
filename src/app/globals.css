@@ -29,6 +29,29 @@
   }
 }
 
+@media (max-width: 767px) {
+  .mobile-bottom-navigation {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  .mobile-bottom-navigation > ul {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .mobile-bottom-navigation li,
+  .mobile-bottom-navigation a {
+    min-width: 0;
+  }
+
+  .mobile-app-content {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
 .bill-sheet {
   position: relative;
   width: 794px;
