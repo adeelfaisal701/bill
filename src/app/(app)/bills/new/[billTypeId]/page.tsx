@@ -12,6 +12,7 @@ import { BillItemFormRow, type DraftBillItem } from "@/components/bills/BillItem
 import { useProducts } from "@/hooks/useProducts";
 import { useToast } from "@/context/ToastContext";
 import { createBill, getNextBillNumber } from "@/services/billService";
+import { listLedgerAccounts } from "@/services/ledgerService";
 import { formatCurrency, generateId, todayIso } from "@/lib/utilities";
 import { validateBillDraft } from "@/lib/validation";
 import { BillTemplate, billTemplateName, billTemplateSubtitle } from "@/components/bills/BillTemplate";
@@ -52,10 +53,16 @@ export default function CreateBillFoundationPage({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
+  const [ledgerAccounts, setLedgerAccounts] = useState<Array<{id: string; name: string}>>([]);
+  const [ledgerAccountId, setLedgerAccountId] = useState("");
 
   useEffect(() => {
     getBusinessProfile().then(setBusiness);
     getNextBillNumber().then(setNextBillNumber);
+    listLedgerAccounts().then((accounts) => {
+      setLedgerAccounts(accounts);
+      if (accounts[0]) setLedgerAccountId(accounts[0].id);
+    });
   }, []);
 
   const subtotal = items.reduce(
@@ -121,6 +128,7 @@ export default function CreateBillFoundationPage({
     try {
       const bill = await createBill({
         billType,
+        ledgerAccountId: ledgerAccountId || undefined,
         partyName,
         partyPhone: partyPhone || undefined,
         partyAddress: partyAddress || undefined,
@@ -193,6 +201,19 @@ export default function CreateBillFoundationPage({
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-ink-700">Society / Company</label>
+              <select
+                value={ledgerAccountId}
+                onChange={(e) => setLedgerAccountId(e.target.value)}
+                className="rounded-xl border border-ink-200 bg-white px-4 py-3 text-[15px] text-ink-900 focus-ring transition-colors focus:border-brand-400"
+              >
+                <option value="">Select a Ledger account</option>
+                {ledgerAccounts.map((account) => (
+                  <option key={account.id} value={account.id}>{account.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </Card>
 

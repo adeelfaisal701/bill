@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Receipt, Package, Settings, Wallet } from "lucide-react";
+import { Home, Receipt, Package, Settings, Wallet, BookText } from "lucide-react";
 import { cn } from "@/lib/utilities";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bills", label: "Bills", icon: Receipt },
+  { href: "/ledger", label: "Ledger", icon: BookText },
   { href: "/products", label: "Products", icon: Package },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -18,7 +19,7 @@ const ITEMS = [
 export function SideNavigation() {
   const pathname = usePathname();
   return (
-    <aside className="hidden w-60 shrink-0 border-r border-ink-100 bg-surface md:flex md:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-[260px] shrink-0 border-r border-ink-100 bg-surface md:flex md:flex-col">
       <div className="flex items-center gap-2 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white">
           <Wallet size={18} />

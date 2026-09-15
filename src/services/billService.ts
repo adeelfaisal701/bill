@@ -3,6 +3,7 @@ import type { Bill, BillFilters, CreateBillInput, UpdateBillInput } from "@/type
 import type { Product } from "@/types/product";
 import { isSameDay, isThisWeek, isThisMonth, isWithinRange } from "@/lib/utilities";
 import { validateBillDraft } from "@/lib/validation";
+import { reconcileLedgerAfterBillChange, removeBillFromLedger, syncBillToLedger } from "@/services/ledgerService";
 
 export async function listBills(): Promise<Bill[]> {
   return repositories.bills.listBills();
@@ -50,8 +51,11 @@ export async function createBill(input: CreateBillInput): Promise<Bill> {
     throw new Error(Object.values(errors)[0]);
   }
   const bill = await repositories.bills.createBill(input);
-  
-  // Deduct stock for each item
+
+  if (input.ledgerAccountId) {
+    await syncBillToLedger(bill, input.ledgerAccountId);
+  }
+
   for (const item of bill.items) {
     if (item.productId) {
       const product = await repositories.products.getProduct(item.productId);
@@ -69,7 +73,10 @@ export async function createBill(input: CreateBillInput): Promise<Bill> {
 export async function deleteBill(id: string): Promise<void> {
   const bill = await repositories.bills.getBill(id);
   if (bill) {
-    // Restore stock for each item
+    if (bill.ledgerAccountId) {
+      await removeBillFromLedger(bill, bill.ledgerAccountId);
+    }
+
     for (const item of bill.items) {
       if (item.productId) {
         const product = await repositories.products.getProduct(item.productId);
@@ -111,7 +118,9 @@ export async function updateBill(id: string, input: UpdateBillInput): Promise<Bi
     }
   }
 
-  return repositories.bills.updateBill(id, input);
+  const updated = await repositories.bills.updateBill(id, input);
+  await reconcileLedgerAfterBillChange(existingBill, updated);
+  return updated;
 }
 
 export interface DashboardStats {

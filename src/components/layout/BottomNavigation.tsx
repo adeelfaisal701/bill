@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Receipt, Package, Settings } from "lucide-react";
+import { Home, Receipt, Package, Settings, BookText } from "lucide-react";
 import { cn } from "@/lib/utilities";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bills", label: "Bills", icon: Receipt },
+  { href: "/ledger", label: "Ledger", icon: BookText },
   { href: "/products", label: "Products", icon: Package },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

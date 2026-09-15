@@ -28,6 +28,7 @@ export interface Bill {
   billType: BillTypeId;
   serialNumber: number;
   billNumber?: string;
+  ledgerAccountId?: string;
   partyName: string;
   partyPhone?: string;
   partyAddress?: string;
@@ -52,6 +53,7 @@ export interface CreateBillItemInput {
 
 export interface CreateBillInput {
   billType: BillTypeId;
+  ledgerAccountId?: string;
   partyName: string;
   partyPhone?: string;
   partyAddress?: string;
@@ -71,6 +73,7 @@ export interface UpdateBillItemInput {
 }
 
 export interface UpdateBillInput {
+  ledgerAccountId?: string;
   partyName?: string;
   partyPhone?: string;
   partyAddress?: string;
