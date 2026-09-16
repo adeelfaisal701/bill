@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -9,8 +9,11 @@ import { Card } from "@/components/ui/Card";
 import { useToast } from "@/context/ToastContext";
 import { createLedgerAccount } from "@/services/ledgerService";
 
-export default function NewLedgerAccountPage() {
+function NewLedgerAccountForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialCompany = searchParams.get("company") || undefined;
+  
   const { show } = useToast();
   const [name, setName] = useState("");
   const [accountCode, setAccountCode] = useState("");
@@ -43,6 +46,7 @@ export default function NewLedgerAccountPage() {
         name,
         accountCode: accountCode || undefined,
         type: type as any,
+        companyId: initialCompany,
         contactDetails: contactDetails || undefined,
         projectName: projectName || undefined,
         projectCode: projectCode || undefined,
@@ -137,5 +141,13 @@ export default function NewLedgerAccountPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function NewLedgerAccountPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+      <NewLedgerAccountForm />
+    </Suspense>
   );
 }

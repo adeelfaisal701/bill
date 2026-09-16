@@ -21,12 +21,12 @@ function safeText(value?: string | null) {
 // AL GHANI TRADERS CONFIGURATION
 // ============================================================================
 const alGhaniConfig = {
-  billNo: { left: "75%", top: "26.5%", width: "20%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  date: { left: "75%", top: "29.5%", width: "20%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  customer: { left: "24%", top: "27.5%", width: "40%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700" },
-  place: { left: "15%", top: "30.5%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
-  phone: { left: "15%", top: "33.5%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
-  total: { left: "79.5%", top: "79%", width: "18.5%", height: "3.5%", color: "#ffffff", fontSize: "15px", fontWeight: "800", alignItems: "center" },
+  billNo: { left: "78%", top: "31.5%", width: "17%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  date: { left: "78%", top: "35%", width: "17%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  customer: { left: "24%", top: "30.5%", width: "40%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700" },
+  place: { left: "15%", top: "33.5%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
+  phone: { left: "15%", top: "36.5%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
+  total: { left: "76%", top: "76.5%", width: "18.5%", height: "3.5%", color: "#ffffff", fontSize: "15px", fontWeight: "800", alignItems: "center" },
   remarks: { left: "52%", top: "80.6%", width: "13%", height: "2.5%", color: "#0d3b36", fontSize: "10px", fontWeight: "400", alignItems: "center" },
   tableStart: 42.5,
   rowHeight: 2.95,
@@ -51,7 +51,7 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
 
   return (
     <article className="bill-sheet reference-sheet" aria-label="AL-GHANI TRADERS bill invoice">
-      <div className="reference-page" style={{ backgroundImage: "url('/Al Ghani.png')" }} aria-hidden="true" />
+      <img className="reference-page" src="/Al Ghani.jpeg" alt="" aria-hidden="true" />
       <div className="reference-overlay">
         <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
         <div className="reference-field" style={{ ...cfg.place }}>{lineTwo}</div>
@@ -60,15 +60,18 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
         <div className="reference-field" style={{ ...cfg.date, justifyContent: "center" }}>{billDateValue}</div>
 
         <div className="reference-items">
-          {rows.map((item, index) => (
+          {rows.map((item, index) => {
+            const hasItem = !!item.productNameSnapshot;
+            return (
             <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#0d3b36", fontSize: "12px", fontWeight: "600" }}>
-              <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{index + 1}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{hasItem ? index + 1 : ""}</span>
               <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }}>{item.productNameSnapshot}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{item.quantity || ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{item.rate ? money(item.rate) : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{item.amount ? money(item.amount) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
             </div>
-          ))}
+            );
+          })}
         </div>
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
         <div className="reference-field" style={{ ...cfg.remarks, justifyContent: "center" }}>{remarks}</div>
@@ -81,11 +84,11 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
 // SHAREEF TRADERS CONFIGURATION
 // ============================================================================
 const shareefConfig = {
-  billNo: { left: "79%", top: "29%", width: "16%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  date: { left: "79%", top: "32%", width: "16%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  customer: { left: "23.5%", top: "31%", width: "40%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700" },
-  place: { left: "16%", top: "34%", width: "44%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
-  phone: { left: "16%", top: "37%", width: "44%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
+  billNo: { left: "76%", top: "32%", width: "19%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  date: { left: "76%", top: "33.8%", width: "19%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  customer: { left: "28%", top: "31%", width: "35%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700" },
+  place: { left: "23%", top: "34%", width: "37%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
+  phone: { left: "23%", top: "38%", width: "37%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
   total: { left: "81%", top: "79.5%", width: "16%", height: "3.5%", color: "#111", fontSize: "15px", fontWeight: "800", alignItems: "center" },
   remarks: { left: "54%", top: "80.6%", width: "11%", height: "2.5%", color: "#0d3b36", fontSize: "10px", fontWeight: "400", alignItems: "center" },
   tableStart: 47,
@@ -111,7 +114,7 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
 
   return (
     <article className="bill-sheet reference-sheet" aria-label="SHAREEF TRADERS bill invoice">
-      <div className="reference-page" style={{ backgroundImage: "url('/Al Shareef.png')" }} aria-hidden="true" />
+      <img className="reference-page" src="/Al Shareef.png" alt="" aria-hidden="true" />
       <div className="reference-overlay">
         <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
         <div className="reference-field" style={{ ...cfg.place }}>{lineTwo}</div>
@@ -120,15 +123,18 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
         <div className="reference-field" style={{ ...cfg.date, justifyContent: "center" }}>{billDateValue}</div>
 
         <div className="reference-items">
-          {rows.map((item, index) => (
+          {rows.map((item, index) => {
+            const hasItem = !!item.productNameSnapshot;
+            return (
             <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#0d3b36", fontSize: "12px", fontWeight: "600" }}>
-              <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{index + 1}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{hasItem ? index + 1 : ""}</span>
               <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }}>{item.productNameSnapshot}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{item.quantity || ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{item.rate ? money(item.rate) : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{item.amount ? money(item.amount) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
             </div>
-          ))}
+            );
+          })}
         </div>
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
         <div className="reference-field" style={{ ...cfg.remarks, justifyContent: "center" }}>{remarks}</div>
@@ -141,16 +147,16 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
 // KING ENTERPRISE CONFIGURATION
 // ============================================================================
 const kingConfig = {
-  billNo: { left: "10%", top: "25%", width: "45%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  date: { left: "71%", top: "29%", width: "22%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  customer: { left: "13%", top: "29%", width: "42%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  total: { left: "71.5%", top: "81%", width: "24%", height: "3.5%", color: "#111", fontSize: "15px", fontWeight: "800", alignItems: "center" },
+  billNo: { left: "10%", top: "29.5%", width: "42%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  date: { left: "70%", top: "33.5%", width: "24%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  customer: { left: "12%", top: "33.5%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  total: { left: "71.5%", top: "88%", width: "24%", height: "3.5%", color: "#111", fontSize: "15px", fontWeight: "800", alignItems: "center" },
   tableStart: 38.5,
   rowHeight: 3.9,
   cols: {
-    detail: { left: "4%", width: "49%", isLeft: true },
-    qty: { left: "53.5%", width: "11.5%" },
-    rate: { left: "65.5%", width: "14%" },
+    detail: { left: "10%", width: "43%", isLeft: true },
+    qty: { left: "55%", width: "11%" },
+    rate: { left: "66%", width: "13.5%" },
     amount: { left: "79.5%", width: "16.5%" }
   }
 };
@@ -164,21 +170,24 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
 
   return (
     <article className="bill-sheet reference-sheet" aria-label="KING ENTERPRISE bill invoice">
-      <div className="reference-page" style={{ backgroundImage: "url('/king enterprise.png')" }} aria-hidden="true" />
+      <img className="reference-page" src="/king enterprise.jpeg" alt="" aria-hidden="true" />
       <div className="reference-overlay">
         <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
         <div className="reference-field" style={{ ...cfg.billNo, justifyContent: "center" }}>{billNumber}</div>
         <div className="reference-field" style={{ ...cfg.date, justifyContent: "center" }}>{billDateValue}</div>
 
         <div className="reference-items">
-          {rows.map((item, index) => (
+          {rows.map((item, index) => {
+            const hasItem = !!item.productNameSnapshot;
+            return (
             <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#111", fontSize: "12px", fontWeight: "600" }}>
               <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }}>{item.productNameSnapshot}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{item.quantity || ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{item.rate ? money(item.rate) : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{item.amount ? money(item.amount) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
             </div>
-          ))}
+            );
+          })}
         </div>
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
       </div>

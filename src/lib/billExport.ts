@@ -4,41 +4,33 @@ import { jsPDF } from "jspdf";
 export async function createBillPdf(element: HTMLElement) {
   const renderHost = document.createElement("div");
   renderHost.className = "bill-pdf-renderer";
-  renderHost.appendChild(element.cloneNode(true));
+  const clone = element.cloneNode(true) as HTMLElement;
+  renderHost.appendChild(clone);
   document.body.appendChild(renderHost);
 
   try {
-    const canvas = await html2canvas(renderHost, {
+    // Give the DOM a tiny moment to ensure the cloned node is fully styled
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const canvas = await html2canvas(clone, {
       scale: 2,
       width: 794,
-      windowWidth: 1024,
+      height: 1123,
+      windowWidth: 794,
+      windowHeight: 1123,
       backgroundColor: "#ffffff",
       useCORS: true,
+      logging: false,
     });
+    
+    // Create exactly one A4 page
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const pageCanvasHeight = Math.floor(canvas.width * (pageHeight / pageWidth));
-
-    for (let offset = 0; offset < canvas.height; offset += pageCanvasHeight) {
-      if (offset > 0) pdf.addPage();
-      const sliceHeight = Math.min(pageCanvasHeight, canvas.height - offset);
-      const slice = document.createElement("canvas");
-      slice.width = canvas.width;
-      slice.height = sliceHeight;
-      slice.getContext("2d")?.drawImage(
-        canvas,
-        0,
-        offset,
-        canvas.width,
-        sliceHeight,
-        0,
-        0,
-        canvas.width,
-        sliceHeight,
-      );
-      pdf.addImage(slice.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, pageWidth, sliceHeight * (pageWidth / canvas.width));
-    }
+    
+    // Fit the canvas perfectly onto the 210x297mm A4 page
+    // This completely eliminates multi-page blank issues and layout shifting.
+    pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, pageWidth, pageHeight);
 
     return pdf;
   } finally {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { BookText } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
@@ -14,13 +14,21 @@ import { listLedgerAccounts, type LedgerSort } from "@/services/ledgerService";
 import { formatCurrency } from "@/lib/utilities";
 import { Button } from "@/components/ui/Button";
 
+const COMPANY_OPTIONS = [
+  { value: "all", label: "All Companies" },
+  { value: "type-1", label: "SHAREEF TRADERS" },
+  { value: "type-2", label: "AL-GHANI TRADERS" },
+  { value: "type-3", label: "KING ENTERPRISE" },
+];
+
 export default function LedgerPage() {
   const { bills, loading, error, reload } = useBills();
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<LedgerSort>("name");
+  const [selectedCompany, setSelectedCompany] = useState("all");
   const [accounts, setAccounts] = useState<any[]>([]);
 
-  useMemo(() => {
+  useEffect(() => {
     listLedgerAccounts().then(setAccounts);
   }, []);
 
@@ -28,9 +36,20 @@ export default function LedgerPage() {
 
   const clients = useMemo(() => {
     const q = query.trim().toLowerCase();
+    
+    // Filter by company first
+    const companyFiltered = selectedCompany === "all" 
+      ? shownAccounts 
+      : shownAccounts.filter(a => a.companyId === selectedCompany || !a.companyId); // include undefined for legacy accounts if desired, but requirements state strict isolation. Let's strictly isolate:
+      
+    // Wait, if an existing record doesn't have a company, we should probably still show it under "all", but under a specific company we only show if it matches.
+    const strictlyCompanyFiltered = selectedCompany === "all"
+      ? shownAccounts
+      : shownAccounts.filter(a => a.companyId === selectedCompany);
+
     const filtered = q
-      ? shownAccounts.filter((account) => account.name.toLowerCase().includes(q) || (account.accountCode ?? "").toLowerCase().includes(q))
-      : shownAccounts;
+      ? strictlyCompanyFiltered.filter((account) => account.name.toLowerCase().includes(q) || (account.accountCode ?? "").toLowerCase().includes(q))
+      : strictlyCompanyFiltered;
 
     return [...filtered].sort((a, b) => {
       if (sortBy === "bills") return (b.totalTransactions ?? 0) - (a.totalTransactions ?? 0) || a.name.localeCompare(b.name);
@@ -42,6 +61,7 @@ export default function LedgerPage() {
       name: account.name,
       accountCode: account.accountCode,
       type: account.type,
+      companyId: account.companyId,
       totalTransactions: account.totalTransactions ?? 0,
       totalDebit: account.totalDebit ?? 0,
       totalCredit: account.totalCredit ?? 0,
@@ -49,31 +69,50 @@ export default function LedgerPage() {
       updatedAt: account.updatedAt,
       slug: account.id,
     }));
-  }, [shownAccounts, query, sortBy]);
+  }, [shownAccounts, query, sortBy, selectedCompany]);
+
+  function getCompanyName(id?: string) {
+    if (!id) return null;
+    return COMPANY_OPTIONS.find(o => o.value === id)?.label;
+  }
 
   return (
     <div>
       <PageHeader title="Ledger" subtitle="Manage society/company accounts and transaction history" action={
-        <Button size="sm" onClick={() => window.location.href = "/ledger/new"}>+ Add Society / Company</Button>
+        <Button size="sm" onClick={() => window.location.href = `/ledger/new${selectedCompany !== 'all' ? `?company=${selectedCompany}` : ''}`}>+ Add Society / Company</Button>
       } />
 
-      <div className="flex flex-col gap-3 px-4 sm:px-6">
-        <SearchBar
-          value={query}
-          onChange={setQuery}
-          placeholder="Search client name"
-        />
+      <div className="flex flex-col gap-4 px-4 sm:px-6">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-semibold uppercase tracking-wide text-brand-600">Company / Business</label>
+          <Select
+            value={selectedCompany}
+            onChange={(event) => setSelectedCompany(event.target.value)}
+            options={COMPANY_OPTIONS}
+          />
+        </div>
 
-        <Select
-          value={sortBy}
-          onChange={(event) => setSortBy(event.target.value as LedgerSort)}
-          options={[
-            { value: "name", label: "Client Name" },
-            { value: "bills", label: "Number of Bills" },
-            { value: "amount", label: "Total Amount" },
-            { value: "recent", label: "Most Recent Bill" },
-          ]}
-        />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex-1">
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              placeholder="Search client name"
+            />
+          </div>
+          <div className="sm:w-48">
+            <Select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as LedgerSort)}
+              options={[
+                { value: "name", label: "Client Name" },
+                { value: "bills", label: "Number of Bills" },
+                { value: "amount", label: "Total Amount" },
+                { value: "recent", label: "Most Recent Bill" },
+              ]}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="mt-4 px-4 pb-4 sm:px-6">
@@ -95,9 +134,16 @@ export default function LedgerPage() {
                 href={`/ledger/${client.slug}`}
                 className="block rounded-2xl border border-ink-100 bg-white p-4 shadow-card transition-shadow hover:shadow-floating"
               >
+                {client.companyId && (
+                  <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-600">
+                    {getCompanyName(client.companyId)}
+                  </p>
+                )}
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-lg font-semibold text-ink-900">{client.name}</p>
+                    <p className="flex items-center gap-2 truncate text-lg font-semibold text-ink-900">
+                      <span className="text-ink-400">•</span> {client.name}
+                    </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-500">
                       <span>{client.type}</span>
                       {client.accountCode && (

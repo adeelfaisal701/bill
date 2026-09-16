@@ -6,6 +6,7 @@ export interface LedgerAccount {
   name: string;
   accountCode?: string;
   type: LedgerAccountType;
+  companyId?: string; // Company / Bill Type (e.g. type-1, type-2)
   contactDetails?: string;
   projectName?: string;
   projectCode?: string;
@@ -38,6 +39,7 @@ export interface CreateLedgerAccountInput {
   name: string;
   accountCode?: string;
   type?: LedgerAccountType;
+  companyId?: string;
   contactDetails?: string;
   projectName?: string;
   projectCode?: string;
