@@ -65,9 +65,15 @@ export function getLedgerAccountBySlug(slug: string): Promise<LedgerAccount | nu
 }
 
 export function createLedgerAccount(input: Omit<LedgerAccount, "id" | "createdAt" | "updatedAt">): Promise<LedgerAccount> {
+  const companyId = input.companyId?.trim();
+  if (!companyId) {
+    throw new Error("Please select a company/business.");
+  }
+
   const now = new Date().toISOString();
   const account: LedgerAccount = {
     ...input,
+    companyId,
     name: input.name.trim(),
     id: generateId("ledger"),
     createdAt: now,
@@ -105,9 +111,15 @@ export function updateLedgerAccount(id: string, patch: Partial<LedgerAccount>): 
   const idx = accounts.findIndex((account) => account.id === id);
   if (idx === -1) throw new Error("Ledger account not found.");
 
+  const nextCompanyId = patch.companyId !== undefined ? patch.companyId.trim() : accounts[idx].companyId;
+  if (patch.companyId !== undefined && !nextCompanyId) {
+    throw new Error("Please select a company/business.");
+  }
+
   const updated: LedgerAccount = {
     ...accounts[idx],
     ...patch,
+    companyId: nextCompanyId,
     name: patch.name?.trim() ?? accounts[idx].name,
     updatedAt: new Date().toISOString(),
   };

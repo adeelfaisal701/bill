@@ -8,7 +8,7 @@ import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useBills } from "@/hooks/useBills";
 import { getLedgerAccountBySlug, getLedgerAccountSummary } from "@/services/ledgerService";
-import { getBusinessProfile } from "@/services/businessService";
+import { getBusinessProfile, listCompanyOptions } from "@/services/businessService";
 import { formatCurrency, formatDate } from "@/lib/utilities";
 import type { LedgerAccount, LedgerTransaction } from "@/types/ledger";
 import type { BusinessProfile } from "@/types/business";
@@ -17,19 +17,13 @@ type LedgerSummary = ReturnType<typeof getLedgerAccountSummary>;
 
 type Filters = { query: string; transactionType: string; paymentMode: string; fromDate: string; toDate: string };
 
-const COMPANY_OPTIONS = [
-  { value: "all", label: "All Companies" },
-  { value: "type-1", label: "SHAREEF TRADERS" },
-  { value: "type-2", label: "AL-GHANI TRADERS" },
-  { value: "type-3", label: "KING ENTERPRISE" },
-];
-
 export default function LedgerDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { bills, loading, error, reload } = useBills();
   const [account, setAccount] = useState<LedgerAccount | null>(null);
   const [summary, setSummary] = useState<LedgerSummary | null>(null);
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
+  const [companyOptions, setCompanyOptions] = useState<Array<{ id: string; name: string }>>([]);
   const [query, setQuery] = useState("");
   const [transactionType, setTransactionType] = useState("all");
   const [paymentMode, setPaymentMode] = useState("all");
@@ -39,12 +33,17 @@ export default function LedgerDetailPage({ params }: { params: Promise<{ slug: s
   const [showAllMobileTransactions, setShowAllMobileTransactions] = useState(false);
 
   useEffect(() => {
+    listCompanyOptions().then(setCompanyOptions);
     getBusinessProfile().then(setBusiness);
     getLedgerAccountBySlug(slug).then((value) => {
       setAccount(value);
       setSummary(value ? getLedgerAccountSummary(value.id) : null);
     });
   }, [slug]);
+
+  const companyName = account?.companyId
+    ? companyOptions.find((company) => company.id === account.companyId)?.name
+    : business?.businessName ?? null;
 
   const transactions = useMemo(() => {
     if (!summary) return [];
@@ -84,13 +83,9 @@ export default function LedgerDetailPage({ params }: { params: Promise<{ slug: s
       {/* TITLE */}
       <div className="min-w-0 px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 print:px-0 print:pt-0">
         <div className="flex flex-col items-center justify-center text-center">
-          {account.companyId ? (
+          {companyName ? (
             <p className="mb-2 text-sm font-bold uppercase tracking-widest text-[#58708f] print:text-black">
-              {COMPANY_OPTIONS.find(o => o.value === account.companyId)?.label || "COMPANY"}
-            </p>
-          ) : business?.businessName ? (
-            <p className="mb-2 text-sm font-bold uppercase tracking-widest text-[#58708f] print:text-black">
-              {business.businessName}
+              {companyName}
             </p>
           ) : null}
           <p className="flex items-center justify-center gap-3 text-xl font-bold leading-tight sm:gap-2 sm:text-[28px] print:text-2xl">

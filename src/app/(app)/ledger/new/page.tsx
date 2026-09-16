@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useToast } from "@/context/ToastContext";
 import { createLedgerAccount } from "@/services/ledgerService";
+import { listCompanyOptions } from "@/services/businessService";
 
 function NewLedgerAccountForm() {
   const router = useRouter();
@@ -15,6 +16,8 @@ function NewLedgerAccountForm() {
   const initialCompany = searchParams.get("company") || undefined;
   
   const { show } = useToast();
+  const [companyId, setCompanyId] = useState(initialCompany ?? "");
+  const [companyOptions, setCompanyOptions] = useState<Array<{ id: string; name: string }>>([]);
   const [name, setName] = useState("");
   const [accountCode, setAccountCode] = useState("");
   const [type, setType] = useState("Society / Company");
@@ -28,9 +31,18 @@ function NewLedgerAccountForm() {
   const [openingBalanceType, setOpeningBalanceType] = useState<"debit" | "credit">("debit");
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    listCompanyOptions().then(setCompanyOptions);
+  }, []);
+
   async function handleSubmit() {
+    if (!companyId.trim()) {
+      show("Please select a company/business.", "error");
+      return;
+    }
+
     if (!name.trim()) {
-      show("Society / Company name is required.", "error");
+      show("Ledger name is required.", "error");
       return;
     }
 
@@ -46,7 +58,7 @@ function NewLedgerAccountForm() {
         name,
         accountCode: accountCode || undefined,
         type: type as any,
-        companyId: initialCompany,
+        companyId,
         contactDetails: contactDetails || undefined,
         projectName: projectName || undefined,
         projectCode: projectCode || undefined,
@@ -72,7 +84,22 @@ function NewLedgerAccountForm() {
       <div className="space-y-4 px-4 sm:px-6">
         <Card className="p-4">
           <div className="grid gap-4">
-            <Input label="Society / Company Name" required value={name} onChange={(e) => setName(e.target.value)} />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-ink-700">Company / Business</label>
+              <select
+                value={companyId}
+                onChange={(e) => setCompanyId(e.target.value)}
+                className="rounded-xl border border-ink-200 bg-white px-4 py-3 text-[15px] text-ink-900 focus-ring transition-colors focus:border-brand-400"
+              >
+                <option value="">Select Company / Business</option>
+                {companyOptions.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Input label="Ledger Name" required value={name} onChange={(e) => setName(e.target.value)} />
             <Input label="Account Code" value={accountCode} onChange={(e) => setAccountCode(e.target.value)} />
 
             <div className="flex flex-col gap-1.5">

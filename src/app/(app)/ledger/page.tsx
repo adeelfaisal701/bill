@@ -11,15 +11,9 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { Select } from "@/components/ui/Select";
 import { useBills } from "@/hooks/useBills";
 import { listLedgerAccounts, type LedgerSort } from "@/services/ledgerService";
+import { listCompanyOptions } from "@/services/businessService";
 import { formatCurrency } from "@/lib/utilities";
 import { Button } from "@/components/ui/Button";
-
-const COMPANY_OPTIONS = [
-  { value: "all", label: "All Companies" },
-  { value: "type-1", label: "SHAREEF TRADERS" },
-  { value: "type-2", label: "AL-GHANI TRADERS" },
-  { value: "type-3", label: "KING ENTERPRISE" },
-];
 
 export default function LedgerPage() {
   const { bills, loading, error, reload } = useBills();
@@ -27,25 +21,28 @@ export default function LedgerPage() {
   const [sortBy, setSortBy] = useState<LedgerSort>("name");
   const [selectedCompany, setSelectedCompany] = useState("all");
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     listLedgerAccounts().then(setAccounts);
+    listCompanyOptions().then(setCompanyOptions);
   }, []);
 
   const shownAccounts = accounts.length > 0 ? accounts : [];
 
+  const companySelectOptions = useMemo(
+    () => [
+      { value: "all", label: "All Companies" },
+      ...companyOptions.map((company) => ({ value: company.id, label: company.name })),
+    ],
+    [companyOptions]
+  );
+
   const clients = useMemo(() => {
     const q = query.trim().toLowerCase();
-    
-    // Filter by company first
-    const companyFiltered = selectedCompany === "all" 
-      ? shownAccounts 
-      : shownAccounts.filter(a => a.companyId === selectedCompany || !a.companyId); // include undefined for legacy accounts if desired, but requirements state strict isolation. Let's strictly isolate:
-      
-    // Wait, if an existing record doesn't have a company, we should probably still show it under "all", but under a specific company we only show if it matches.
     const strictlyCompanyFiltered = selectedCompany === "all"
       ? shownAccounts
-      : shownAccounts.filter(a => a.companyId === selectedCompany);
+      : shownAccounts.filter((account) => account.companyId === selectedCompany);
 
     const filtered = q
       ? strictlyCompanyFiltered.filter((account) => account.name.toLowerCase().includes(q) || (account.accountCode ?? "").toLowerCase().includes(q))
@@ -73,7 +70,7 @@ export default function LedgerPage() {
 
   function getCompanyName(id?: string) {
     if (!id) return null;
-    return COMPANY_OPTIONS.find(o => o.value === id)?.label;
+    return companyOptions.find((company) => company.id === id)?.name ?? "Company";
   }
 
   return (
@@ -88,7 +85,7 @@ export default function LedgerPage() {
           <Select
             value={selectedCompany}
             onChange={(event) => setSelectedCompany(event.target.value)}
-            options={COMPANY_OPTIONS}
+            options={companySelectOptions}
           />
         </div>
 
