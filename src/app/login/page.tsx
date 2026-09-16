@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Wallet } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -21,15 +20,17 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
-      setError("Enter your email and password to continue.");
+      setError("Invalid email or password.");
       return;
     }
     setLoading(true);
     try {
       await signIn(email.trim(), password);
       router.push("/");
-    } catch {
-      show("Unable to sign in. Please try again.", "error");
+    } catch (err) {
+      const message = err instanceof Error && err.message ? err.message : "Invalid email or password.";
+      setError(message);
+      show(message, "error");
     } finally {
       setLoading(false);
     }
@@ -43,13 +44,12 @@ export default function LoginPage() {
             <Wallet size={24} />
           </div>
           <h1 className="text-lg font-bold text-ink-900">BillBook</h1>
-          <p className="text-sm text-ink-400">Sign in to your business</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
             label="Email"
             type="email"
-            placeholder="you@business.com"
+            placeholder="ramzaan12@gmail.com"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -68,19 +68,9 @@ export default function LoginPage() {
             error={error}
           />
           <Button type="submit" size="lg" fullWidth disabled={loading} className="mt-2">
-            {loading ? "Signing in…" : "Sign In"}
+            {loading ? "Logging in…" : "Login"}
           </Button>
         </form>
-        <p className="mt-6 text-center text-sm text-ink-400">
-          New here?{" "}
-          <Link href="/signup" className="font-medium text-brand-600 hover:underline">
-            Create an account
-          </Link>
-        </p>
-        <p className="mt-4 text-center text-xs text-ink-300">
-          Demo mode — any email &amp; password works. Real authentication is
-          wired up once Firebase is configured.
-        </p>
       </div>
     </div>
   );

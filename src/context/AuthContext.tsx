@@ -31,10 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(u);
       setStatus("authenticated");
     },
-    signUp: async (name, email, password) => {
-      const u = await authService.signUp(name, email, password);
-      setUser(u);
-      setStatus("authenticated");
+    signUp: async () => {
+      throw new Error("Account creation is disabled.");
     },
     signOut: async () => {
       await authService.signOut();
