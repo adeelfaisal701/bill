@@ -46,7 +46,9 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
   const billNumber = safeText(bill.billNumber) || String(bill.serialNumber || "");
   const billDateValue = bill.date ? billDate(bill.date) : "";
   const remarks = safeText(bill.notes);
-  const rows = bill.items.slice(0, 13);
+  const rows = (bill.items ?? [])
+    .filter((item) => item && (safeText(item.productNameSnapshot) || !!item.productId || item.quantity > 0 || item.rate > 0))
+    .slice(0, 13);
   const cfg = alGhaniConfig;
 
   return (
@@ -109,7 +111,9 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
   const billNumber = safeText(bill.billNumber) || String(bill.serialNumber || "");
   const billDateValue = bill.date ? billDate(bill.date) : "";
   const remarks = safeText(bill.notes);
-  const rows = bill.items.slice(0, 13);
+  const rows = (bill.items ?? [])
+    .filter((item) => item && (safeText(item.productNameSnapshot) || !!item.productId || item.quantity > 0 || item.rate > 0))
+    .slice(0, 13);
   const cfg = shareefConfig;
 
   return (
@@ -165,7 +169,9 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
   const lineOne = safeText(bill.partyName);
   const billNumber = safeText(bill.billNumber) || String(bill.serialNumber || "");
   const billDateValue = bill.date ? billDate(bill.date) : "";
-  const rows = bill.items.slice(0, 13);
+  const rows = (bill.items ?? [])
+    .filter((item) => item && (safeText(item.productNameSnapshot) || !!item.productId || item.quantity > 0 || item.rate > 0))
+    .slice(0, 13);
   const cfg = kingConfig;
 
   return (

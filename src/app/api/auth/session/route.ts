@@ -2,11 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 const SESSION_COOKIE = "billbook_session";
-const FIXED_EMAIL = process.env.AUTH_EMAIL?.trim().toLowerCase();
-
-if (!FIXED_EMAIL) {
-  throw new Error("Authentication is not configured. Ensure AUTH_EMAIL is set.");
-}
+const DEFAULT_EMAIL = "ramzaan12@gmail.com";
+const FIXED_EMAIL = (process.env.AUTH_EMAIL ?? DEFAULT_EMAIL).trim().toLowerCase();
 
 export async function GET() {
   const cookieStore = await cookies();

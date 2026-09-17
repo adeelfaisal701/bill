@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 
 const SESSION_COOKIE = "billbook_session";
-const FIXED_EMAIL = process.env.AUTH_EMAIL?.trim().toLowerCase();
-const FIXED_PASSWORD = process.env.AUTH_PASSWORD?.trim();
+const DEFAULT_EMAIL = "ramzaan12@gmail.com";
+const DEFAULT_PASSWORD = "12ramzan";
 
-if (!FIXED_EMAIL || !FIXED_PASSWORD) {
-  throw new Error("Authentication is not configured. Ensure AUTH_EMAIL and AUTH_PASSWORD are set.");
-}
+const FIXED_EMAIL = (process.env.AUTH_EMAIL ?? DEFAULT_EMAIL).trim().toLowerCase();
+const FIXED_PASSWORD = (process.env.AUTH_PASSWORD ?? DEFAULT_PASSWORD).trim();
 
 const FIXED_USER = {
   id: "fixed-admin",
