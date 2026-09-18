@@ -55,6 +55,9 @@ export default function CreateBillFoundationPage({
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
   const [ledgerAccounts, setLedgerAccounts] = useState<Array<{id: string; name: string}>>([]);
   const [ledgerAccountId, setLedgerAccountId] = useState("");
+  
+  const [taxPercentage, setTaxPercentage] = useState<number | "">("");
+  const [discountPercentage, setDiscountPercentage] = useState<number | "">("");
 
   useEffect(() => {
     getBusinessProfile().then(setBusiness);
@@ -69,6 +72,13 @@ export default function CreateBillFoundationPage({
     (sum, i) => sum + Math.max(0, i.quantity) * Math.max(0, i.rate),
     0
   );
+
+  const parsedTax = Number(taxPercentage) || 0;
+  const parsedDiscount = Number(discountPercentage) || 0;
+  
+  const taxAmount = (subtotal * parsedTax) / 100;
+  const discountAmount = (subtotal * parsedDiscount) / 100;
+  const totalAmount = subtotal + taxAmount - discountAmount;
 
   const previewBill = useMemo<Bill>(() => ({
     id: "preview",
@@ -89,13 +99,17 @@ export default function CreateBillFoundationPage({
       amount: Math.max(0, item.quantity) * Math.max(0, item.rate),
     })),
     subtotal,
-    totalAmount: subtotal,
+    taxPercentage: parsedTax > 0 ? parsedTax : undefined,
+    taxAmount: taxAmount > 0 ? taxAmount : undefined,
+    discountPercentage: parsedDiscount > 0 ? parsedDiscount : undefined,
+    discountAmount: discountAmount > 0 ? discountAmount : undefined,
+    totalAmount,
     notes: notes || undefined,
     status: "draft",
     paymentStatus: "pending",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  }), [billType, date, items, nextBillNumber, notes, partyAddress, partyName, partyPhone, subtotal]);
+  }), [billType, date, items, nextBillNumber, notes, partyAddress, partyName, partyPhone, subtotal, parsedTax, taxAmount, parsedDiscount, discountAmount, totalAmount]);
 
   function updateItem(key: string, patch: Partial<DraftBillItem>) {
     setItems((prev) => prev.map((it) => (it.key === key ? { ...it, ...patch } : it)));
@@ -141,6 +155,8 @@ export default function CreateBillFoundationPage({
           rate: i.rate,
           costPrice: i.costPrice,
         })),
+        taxPercentage: parsedTax > 0 ? parsedTax : undefined,
+        discountPercentage: parsedDiscount > 0 ? parsedDiscount : undefined,
       });
       show("Bill saved successfully.", "success");
       router.push(`/bills/${bill.id}`);
@@ -254,14 +270,49 @@ export default function CreateBillFoundationPage({
         </Card>
 
         <Card className="no-print p-4">
-          <div className="flex items-center justify-between text-sm text-ink-500">
-            <span>Subtotal</span>
-            <span className="font-mono">{formatCurrency(subtotal)}</span>
+          <div className="mb-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Tax (%)"
+              type="number"
+              min={0}
+              placeholder="0"
+              value={taxPercentage}
+              onChange={(e) => setTaxPercentage(e.target.value === "" ? "" : Number(e.target.value))}
+            />
+            <Input
+              label="Discount (%)"
+              type="number"
+              min={0}
+              placeholder="0"
+              value={discountPercentage}
+              onChange={(e) => setDiscountPercentage(e.target.value === "" ? "" : Number(e.target.value))}
+            />
           </div>
-          <div className="mt-2 flex items-center justify-between border-t border-ink-100 pt-2">
+        </Card>
+
+        <Card className="no-print p-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm text-ink-500">
+              <span>Subtotal</span>
+              <span className="font-mono">{formatCurrency(subtotal)}</span>
+            </div>
+            {taxAmount > 0 && (
+              <div className="flex items-center justify-between text-sm text-ink-500">
+                <span>Tax ({parsedTax}%)</span>
+                <span className="font-mono">{formatCurrency(taxAmount)}</span>
+              </div>
+            )}
+            {discountAmount > 0 && (
+              <div className="flex items-center justify-between text-sm text-brand-600">
+                <span>Discount ({parsedDiscount}%)</span>
+                <span className="font-mono">-{formatCurrency(discountAmount)}</span>
+              </div>
+            )}
+          </div>
+          <div className="mt-3 flex items-center justify-between border-t border-ink-100 pt-3">
             <span className="font-semibold text-ink-900">Total</span>
             <span className="font-mono text-lg font-bold text-ink-900">
-              {formatCurrency(subtotal)}
+              {formatCurrency(totalAmount)}
             </span>
           </div>
         </Card>

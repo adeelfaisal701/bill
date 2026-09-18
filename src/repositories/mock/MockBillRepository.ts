@@ -81,6 +81,12 @@ export class MockBillRepository implements BillRepository {
 
     const subtotal = items.reduce((sum, i) => sum + i.amount, 0);
 
+    const taxPercentage = input.taxPercentage || 0;
+    const discountPercentage = input.discountPercentage || 0;
+    const taxAmount = (subtotal * taxPercentage) / 100;
+    const discountAmount = (subtotal * discountPercentage) / 100;
+    const totalAmount = subtotal + taxAmount - discountAmount;
+
     const bill: Bill = {
       id: billId,
       billType: input.billType,
@@ -92,7 +98,11 @@ export class MockBillRepository implements BillRepository {
       date: input.date,
       items,
       subtotal,
-      totalAmount: subtotal,
+      taxPercentage: taxPercentage > 0 ? taxPercentage : undefined,
+      taxAmount: taxAmount > 0 ? taxAmount : undefined,
+      discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
+      discountAmount: discountAmount > 0 ? discountAmount : undefined,
+      totalAmount,
       notes: input.notes?.trim() || undefined,
       status: "saved",
       paymentStatus: input.paymentStatus ?? "pending",
@@ -133,6 +143,12 @@ export class MockBillRepository implements BillRepository {
       subtotal = updatedItems.reduce((sum, i) => sum + i.amount, 0);
     }
 
+    const taxPercentage = patch.taxPercentage ?? existing.taxPercentage ?? 0;
+    const discountPercentage = patch.discountPercentage ?? existing.discountPercentage ?? 0;
+    const taxAmount = (subtotal * taxPercentage) / 100;
+    const discountAmount = (subtotal * discountPercentage) / 100;
+    const totalAmount = subtotal + taxAmount - discountAmount;
+
     const updated: Bill = {
       ...existing,
       ...patch,
@@ -142,7 +158,11 @@ export class MockBillRepository implements BillRepository {
       date: patch.date ?? existing.date,
       items: updatedItems,
       subtotal,
-      totalAmount: subtotal,
+      taxPercentage: taxPercentage > 0 ? taxPercentage : undefined,
+      taxAmount: taxAmount > 0 ? taxAmount : undefined,
+      discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
+      discountAmount: discountAmount > 0 ? discountAmount : undefined,
+      totalAmount,
       notes: patch.notes !== undefined ? patch.notes : existing.notes,
       paymentStatus: patch.paymentStatus ?? existing.paymentStatus,
       updatedAt: new Date().toISOString(),

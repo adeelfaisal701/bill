@@ -1,5 +1,49 @@
+import { useEffect, useRef } from "react";
 import type { Bill, BillTypeId } from "@/types/bill";
 import type { BusinessProfile } from "@/types/business";
+
+function AutoFitText({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
+  const containerRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const textNode = textRef.current;
+    if (!container || !textNode) return;
+
+    const calculateSize = () => {
+      textNode.style.fontSize = "100%"; // reset to measure
+      const containerWidth = container.clientWidth;
+      const textWidth = textNode.scrollWidth;
+
+      if (textWidth > containerWidth && containerWidth > 0 && textWidth > 0) {
+        const ratio = containerWidth / textWidth;
+        // Min size approx ~65% of original (e.g. 12px -> ~7.8px)
+        textNode.style.fontSize = `${Math.max(65, Math.floor(ratio * 98))}%`;
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => calculateSize());
+    resizeObserver.observe(container);
+    
+    // Also calculate immediately
+    calculateSize();
+
+    return () => resizeObserver.disconnect();
+  }, [text]);
+
+  return (
+    <span
+      ref={containerRef}
+      className={className}
+      style={{ ...style, overflow: "hidden", whiteSpace: "nowrap", display: "flex", alignItems: "center" }}
+    >
+      <span ref={textRef} style={{ whiteSpace: "nowrap" }}>
+        {text}
+      </span>
+    </span>
+  );
+}
 
 export type BillTemplateProps = {
   bill: Bill;
@@ -67,7 +111,7 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
             return (
             <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#0d3b36", fontSize: "12px", fontWeight: "600" }}>
               <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{hasItem ? index + 1 : ""}</span>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }}>{item.productNameSnapshot}</span>
+              <AutoFitText className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }} text={item.productNameSnapshot} />
               <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
               <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
               <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
@@ -75,6 +119,28 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
             );
           })}
         </div>
+
+        {!!bill.taxAmount && (
+          <>
+            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
+              Tax
+            </div>
+            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
+              Rs. {money(bill.taxAmount)}
+            </div>
+          </>
+        )}
+        {!!bill.discountAmount && (
+          <>
+            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
+              Discount
+            </div>
+            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
+              Rs. {money(bill.discountAmount)}
+            </div>
+          </>
+        )}
+
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
         <div className="reference-field" style={{ ...cfg.remarks, justifyContent: "center" }}>{remarks}</div>
       </div>
@@ -132,7 +198,7 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
             return (
             <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#0d3b36", fontSize: "12px", fontWeight: "600" }}>
               <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{hasItem ? index + 1 : ""}</span>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }}>{item.productNameSnapshot}</span>
+              <AutoFitText className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }} text={item.productNameSnapshot} />
               <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
               <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
               <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
@@ -140,6 +206,28 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
             );
           })}
         </div>
+
+        {!!bill.taxAmount && (
+          <>
+            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
+              Tax
+            </div>
+            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
+              Rs. {money(bill.taxAmount)}
+            </div>
+          </>
+        )}
+        {!!bill.discountAmount && (
+          <>
+            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
+              Discount
+            </div>
+            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
+              Rs. {money(bill.discountAmount)}
+            </div>
+          </>
+        )}
+
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
         <div className="reference-field" style={{ ...cfg.remarks, justifyContent: "center" }}>{remarks}</div>
       </div>
@@ -187,7 +275,7 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
             const hasItem = !!item.productNameSnapshot;
             return (
             <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#111", fontSize: "12px", fontWeight: "600" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }}>{item.productNameSnapshot}</span>
+              <AutoFitText className="reference-cell reference-cell-left" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width }} text={item.productNameSnapshot} />
               <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
               <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
               <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
@@ -195,6 +283,28 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
             );
           })}
         </div>
+
+        {!!bill.taxAmount && (
+          <>
+            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
+              Tax
+            </div>
+            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
+              Rs. {money(bill.taxAmount)}
+            </div>
+          </>
+        )}
+        {!!bill.discountAmount && (
+          <>
+            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
+              Discount
+            </div>
+            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
+              Rs. {money(bill.discountAmount)}
+            </div>
+          </>
+        )}
+
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
       </div>
     </article>

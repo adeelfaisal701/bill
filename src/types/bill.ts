@@ -35,6 +35,10 @@ export interface Bill {
   date: string; // ISO date
   items: BillItem[];
   subtotal: number;
+  taxPercentage?: number;
+  taxAmount?: number;
+  discountPercentage?: number;
+  discountAmount?: number;
   totalAmount: number;
   notes?: string;
   status: BillStatus;
@@ -59,6 +63,8 @@ export interface CreateBillInput {
   partyAddress?: string;
   date: string;
   items: CreateBillItemInput[];
+  taxPercentage?: number;
+  discountPercentage?: number;
   notes?: string;
   paymentStatus?: PaymentStatus;
 }
@@ -79,6 +85,8 @@ export interface UpdateBillInput {
   partyAddress?: string;
   date?: string;
   items?: UpdateBillItemInput[];
+  taxPercentage?: number;
+  discountPercentage?: number;
   notes?: string;
   paymentStatus?: PaymentStatus;
 }
