@@ -120,25 +120,26 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
           })}
         </div>
 
-        {!!bill.taxAmount && (
-          <>
-            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
-              Tax
-            </div>
-            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
-              Rs. {money(bill.taxAmount)}
-            </div>
-          </>
-        )}
-        {!!bill.discountAmount && (
-          <>
-            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
-              Discount
-            </div>
-            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: cfg.total.color === "#ffffff" ? "#111" : cfg.total.color, fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
-              Rs. {money(bill.discountAmount)}
-            </div>
-          </>
+        {(!!bill.taxAmount || !!bill.discountAmount) && (
+          <div style={{ 
+            position: "absolute", left: 0, width: "100%", top: "71.5%", 
+            display: "grid", 
+            gridTemplateColumns: `${cfg.cols.detail.left} ${cfg.cols.detail.width} calc(${cfg.total.left} - (${cfg.cols.detail.left} + ${cfg.cols.detail.width})) ${cfg.total.width} 1fr`,
+            rowGap: "4px", color: "#111", fontSize: "12px", fontWeight: "700" 
+          }}>
+            {!!bill.taxAmount && (
+              <>
+                <div style={{ gridColumn: 2, textAlign: "right", paddingRight: "10px" }}>Tax</div>
+                <div style={{ gridColumn: 4, textAlign: "center" }}>Rs. {money(bill.taxAmount)}</div>
+              </>
+            )}
+            {!!bill.discountAmount && (
+              <>
+                <div style={{ gridColumn: 2, textAlign: "right", paddingRight: "10px" }}>Discount</div>
+                <div style={{ gridColumn: 4, textAlign: "center" }}>Rs. {money(bill.discountAmount)}</div>
+              </>
+            )}
+          </div>
         )}
 
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
@@ -207,25 +208,26 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
           })}
         </div>
 
-        {!!bill.taxAmount && (
-          <>
-            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
-              Tax
-            </div>
-            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
-              Rs. {money(bill.taxAmount)}
-            </div>
-          </>
-        )}
-        {!!bill.discountAmount && (
-          <>
-            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
-              Discount
-            </div>
-            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
-              Rs. {money(bill.discountAmount)}
-            </div>
-          </>
+        {(!!bill.taxAmount || !!bill.discountAmount) && (
+          <div style={{ 
+            position: "absolute", left: 0, width: "100%", top: "74.5%", 
+            display: "grid", 
+            gridTemplateColumns: `${cfg.cols.detail.left} ${cfg.cols.detail.width} calc(${cfg.total.left} - (${cfg.cols.detail.left} + ${cfg.cols.detail.width})) ${cfg.total.width} 1fr`,
+            rowGap: "4px", color: "#111", fontSize: "12px", fontWeight: "700" 
+          }}>
+            {!!bill.taxAmount && (
+              <>
+                <div style={{ gridColumn: 2, textAlign: "right", paddingRight: "10px" }}>Tax</div>
+                <div style={{ gridColumn: 4, textAlign: "center" }}>Rs. {money(bill.taxAmount)}</div>
+              </>
+            )}
+            {!!bill.discountAmount && (
+              <>
+                <div style={{ gridColumn: 2, textAlign: "right", paddingRight: "10px" }}>Discount</div>
+                <div style={{ gridColumn: 4, textAlign: "center" }}>Rs. {money(bill.discountAmount)}</div>
+              </>
+            )}
+          </div>
         )}
 
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
@@ -284,25 +286,26 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
           })}
         </div>
 
-        {!!bill.taxAmount && (
-          <>
-            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
-              Tax
-            </div>
-            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 4%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
-              Rs. {money(bill.taxAmount)}
-            </div>
-          </>
-        )}
-        {!!bill.discountAmount && (
-          <>
-            <div className="reference-field" style={{ left: cfg.cols.detail.left, width: cfg.cols.detail.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "flex-end", paddingRight: "10px" }}>
-              Discount
-            </div>
-            <div className="reference-field" style={{ left: cfg.total.left, width: cfg.total.width, top: `calc(${cfg.total.top} - 2%)`, height: "2%", color: "#111", fontSize: "12px", fontWeight: "700", justifyContent: "center" }}>
-              Rs. {money(bill.discountAmount)}
-            </div>
-          </>
+        {(!!bill.taxAmount || !!bill.discountAmount) && (
+          <div style={{ 
+            position: "absolute", left: 0, width: "100%", top: "82.5%", 
+            display: "grid", 
+            gridTemplateColumns: `${cfg.cols.detail.left} ${cfg.cols.detail.width} calc(${cfg.total.left} - (${cfg.cols.detail.left} + ${cfg.cols.detail.width})) ${cfg.total.width} 1fr`,
+            rowGap: "4px", color: "#111", fontSize: "12px", fontWeight: "700" 
+          }}>
+            {!!bill.taxAmount && (
+              <>
+                <div style={{ gridColumn: 2, textAlign: "right", paddingRight: "10px" }}>Tax</div>
+                <div style={{ gridColumn: 4, textAlign: "center" }}>Rs. {money(bill.taxAmount)}</div>
+              </>
+            )}
+            {!!bill.discountAmount && (
+              <>
+                <div style={{ gridColumn: 2, textAlign: "right", paddingRight: "10px" }}>Discount</div>
+                <div style={{ gridColumn: 4, textAlign: "center" }}>Rs. {money(bill.discountAmount)}</div>
+              </>
+            )}
+          </div>
         )}
 
         <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
