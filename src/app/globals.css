@@ -142,6 +142,10 @@
 
 .reference-cell-left {
   justify-content: flex-start !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow: hidden !important;
+  line-height: 1.2 !important;
 }
 
 @media print {

@@ -28,11 +28,11 @@ const alGhaniConfig = {
   phone: { left: "15%", top: "36.5%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600" },
   total: { left: "76%", top: "76.5%", width: "18.5%", height: "3.5%", color: "#ffffff", fontSize: "15px", fontWeight: "800", alignItems: "center" },
   remarks: { left: "52%", top: "80.6%", width: "13%", height: "2.5%", color: "#0d3b36", fontSize: "10px", fontWeight: "400", alignItems: "center" },
-  tableStart: 42.5,
+  tableStart: 45.5,
   rowHeight: 2.95,
   cols: {
     sr: { left: "3%", width: "9%" },
-    detail: { left: "12.5%", width: "41%", isLeft: true },
+    detail: { left: "14%", width: "39%", isLeft: true },
     qty: { left: "54%", width: "12%" },
     rate: { left: "66%", width: "12.5%" },
     amount: { left: "78.5%", width: "18%" }
@@ -97,7 +97,7 @@ const shareefConfig = {
   rowHeight: 2.9,
   cols: {
     sr: { left: "3.5%", width: "9.5%" },
-    detail: { left: "13.5%", width: "41%", isLeft: true },
+    detail: { left: "16%", width: "38.5%", isLeft: true },
     qty: { left: "55%", width: "11.5%" },
     rate: { left: "66.5%", width: "12.5%" },
     amount: { left: "79.5%", width: "17%" }
@@ -155,10 +155,10 @@ const kingConfig = {
   date: { left: "70%", top: "33.5%", width: "24%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
   customer: { left: "12%", top: "33.5%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
   total: { left: "71.5%", top: "88%", width: "24%", height: "3.5%", color: "#111", fontSize: "15px", fontWeight: "800", alignItems: "center" },
-  tableStart: 38.5,
+  tableStart: 42.4,
   rowHeight: 3.9,
   cols: {
-    detail: { left: "10%", width: "43%", isLeft: true },
+    detail: { left: "13%", width: "40%", isLeft: true },
     qty: { left: "55%", width: "11%" },
     rate: { left: "66%", width: "13.5%" },
     amount: { left: "79.5%", width: "16.5%" }
