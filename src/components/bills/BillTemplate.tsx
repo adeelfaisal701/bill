@@ -118,7 +118,7 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
 
   return (
     <article className="bill-sheet reference-sheet" aria-label="SHAREEF TRADERS bill invoice">
-      <img className="reference-page" src="/Al Shareef.png" alt="" aria-hidden="true" />
+      <img className="reference-page" src="/Al Shareef.jpeg" alt="" aria-hidden="true" />
       <div className="reference-overlay">
         <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
         <div className="reference-field" style={{ ...cfg.place }}>{lineTwo}</div>
@@ -151,17 +151,17 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
 // KING ENTERPRISE CONFIGURATION
 // ============================================================================
 const kingConfig = {
-  billNo: { left: "10%", top: "29.5%", width: "42%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  date: { left: "70%", top: "33.5%", width: "24%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  customer: { left: "12%", top: "33.5%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  billNo: { left: "11.5%", top: "34.0%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  date: { left: "75%", top: "35.5%", width: "24%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  customer: { left: "17%", top: "35.5%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
   total: { left: "71.5%", top: "88%", width: "24%", height: "3.5%", color: "#111", fontSize: "15px", fontWeight: "800", alignItems: "center" },
-  tableStart: 42.4,
-  rowHeight: 3.9,
+  tableStart: 43.2,
+  rowHeight: 3.6,
   cols: {
-    detail: { left: "13%", width: "40%", isLeft: true },
-    qty: { left: "55%", width: "11%" },
-    rate: { left: "66%", width: "13.5%" },
-    amount: { left: "79.5%", width: "16.5%" }
+    detail: { left: "12%", width: "40%", isLeft: true },
+    qty: { left: "56%", width: "11%" },
+    rate: { left: "68%", width: "12%" },
+    amount: { left: "83%", width: "14%" }
   }
 };
 
@@ -179,8 +179,8 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
       <img className="reference-page" src="/king enterprise.jpeg" alt="" aria-hidden="true" />
       <div className="reference-overlay">
         <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
-        <div className="reference-field" style={{ ...cfg.billNo, justifyContent: "center" }}>{billNumber}</div>
-        <div className="reference-field" style={{ ...cfg.date, justifyContent: "center" }}>{billDateValue}</div>
+        <div className="reference-field" style={{ ...cfg.billNo }}>{billNumber}</div>
+        <div className="reference-field" style={{ ...cfg.date }}>{billDateValue}</div>
 
         <div className="reference-items">
           {rows.map((item, index) => {

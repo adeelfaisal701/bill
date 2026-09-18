@@ -6,6 +6,11 @@ import { ToastProvider } from "@/context/ToastContext";
 export const metadata: Metadata = {
   title: "BillBook — Bill Management",
   description: "A simple, professional bill management app for daily business use.",
+  icons: {
+    icon: "/logo.jpeg",
+    apple: "/logo.jpeg",
+  },
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
