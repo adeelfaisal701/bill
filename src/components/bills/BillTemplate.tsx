@@ -1,49 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { Bill, BillTypeId } from "@/types/bill";
 import type { BusinessProfile } from "@/types/business";
-
-function AutoFitText({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
-  const containerRef = useRef<HTMLSpanElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    const textNode = textRef.current;
-    if (!container || !textNode) return;
-
-    const calculateSize = () => {
-      textNode.style.fontSize = "100%"; // reset to measure
-      const containerWidth = container.clientWidth;
-      const textWidth = textNode.scrollWidth;
-
-      if (textWidth > containerWidth && containerWidth > 0 && textWidth > 0) {
-        const ratio = containerWidth / textWidth;
-        // Min size approx ~65% of original (e.g. 12px -> ~7.8px)
-        textNode.style.fontSize = `${Math.max(65, Math.floor(ratio * 98))}%`;
-      }
-    };
-
-    const resizeObserver = new ResizeObserver(() => calculateSize());
-    resizeObserver.observe(container);
-    
-    // Also calculate immediately
-    calculateSize();
-
-    return () => resizeObserver.disconnect();
-  }, [text]);
-
-  return (
-    <span
-      ref={containerRef}
-      className={className}
-      style={{ ...style, overflow: "hidden", whiteSpace: "nowrap", display: "flex", alignItems: "center" }}
-    >
-      <span ref={textRef} style={{ whiteSpace: "nowrap" }}>
-        {text}
-      </span>
-    </span>
-  );
-}
 
 export type BillTemplateProps = {
   bill: Bill;
@@ -59,6 +16,153 @@ function billDate(value: string) {
 
 function safeText(value?: string | null) {
   return value?.trim() || "";
+}
+
+type ReferenceColumn = { left: string; width: string };
+
+type ReferenceConfig = {
+  tableStart: number;
+  rowHeight: number;
+  summaryBottomTop: number;
+  summaryGap: number;
+  total: { top: string };
+  cols: {
+    sr?: ReferenceColumn;
+    detail: ReferenceColumn;
+    qty: ReferenceColumn;
+    rate: ReferenceColumn;
+    amount: ReferenceColumn;
+  };
+};
+
+const REFERENCE_PAGE_HEIGHT = 1123;
+
+function useReferenceRowLayout(
+  rows: Bill["items"],
+  cfg: ReferenceConfig,
+) {
+  const detailRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [rowHeights, setRowHeights] = useState<number[]>([]);
+
+  useLayoutEffect(() => {
+    const measureRows = () => {
+      const nextHeights = rows.map((_, index) => {
+        const minimumHeight = (cfg.rowHeight / 100) * REFERENCE_PAGE_HEIGHT;
+        const detail = detailRefs.current[index];
+        return Math.max(minimumHeight, detail?.scrollHeight ?? minimumHeight);
+      });
+
+      setRowHeights((current) =>
+        current.length === nextHeights.length && current.every((height, index) => height === nextHeights[index])
+          ? current
+          : nextHeights,
+      );
+    };
+
+    measureRows();
+    const observers = detailRefs.current.map((detail) => {
+      if (!detail) return null;
+      const observer = new ResizeObserver(measureRows);
+      observer.observe(detail);
+      return observer;
+    });
+
+    return () => observers.forEach((observer) => observer?.disconnect());
+  }, [cfg, rows]);
+
+  const heights = rows.map((_, index) => rowHeights[index] ?? (cfg.rowHeight / 100) * REFERENCE_PAGE_HEIGHT);
+  const itemsEnd = (cfg.tableStart / 100) * REFERENCE_PAGE_HEIGHT + heights.reduce((sum, height) => sum + height, 0);
+  const summaryStart = (cfg.summaryBottomTop / 100) * REFERENCE_PAGE_HEIGHT;
+  const shift = Math.max(0, itemsEnd - summaryStart);
+
+  return { detailRefs, heights, shift };
+}
+
+function ReferenceItems({
+  rows,
+  cfg,
+  color,
+  includeSerial,
+  taxAmount,
+  discountAmount,
+  totalAmount,
+  remarks,
+  remarksStyle,
+}: {
+  rows: Bill["items"];
+  cfg: ReferenceConfig;
+  color: string;
+  includeSerial: boolean;
+  taxAmount?: number;
+  discountAmount?: number;
+  totalAmount: number;
+  remarks?: string;
+  remarksStyle?: React.CSSProperties;
+}) {
+  const layout = useReferenceRowLayout(rows, cfg);
+  const baseTop = (cfg.tableStart / 100) * REFERENCE_PAGE_HEIGHT;
+  const totalTop = parseFloat(cfg.total.top) + (layout.shift / REFERENCE_PAGE_HEIGHT) * 100;
+  const hasTax = !!taxAmount;
+  const hasDiscount = !!discountAmount;
+  const taxTop = cfg.summaryBottomTop - (hasTax && hasDiscount ? cfg.summaryGap : 0) + (layout.shift / REFERENCE_PAGE_HEIGHT) * 100;
+  const discountTop = cfg.summaryBottomTop + (layout.shift / REFERENCE_PAGE_HEIGHT) * 100;
+
+  return (
+    <>
+      <div className="reference-items">
+        {rows.map((item, index) => {
+          const hasItem = !!item.productNameSnapshot;
+          const top = baseTop + layout.heights.slice(0, index).reduce((sum, height) => sum + height, 0);
+          return (
+            <div
+              className="reference-row"
+              key={item.id || index}
+              style={{ top: `${top}px`, height: `${layout.heights[index]}px`, color, fontSize: "12px", fontWeight: "600" }}
+            >
+              {includeSerial && <span className="reference-cell" style={{ left: cfg.cols.sr!.left, width: cfg.cols.sr!.width }}>{hasItem ? index + 1 : ""}</span>}
+              <div
+                ref={(element) => { layout.detailRefs.current[index] = element; }}
+                className="reference-cell reference-cell-left"
+                style={{
+                  left: cfg.cols.detail.left,
+                  width: cfg.cols.detail.width,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  whiteSpace: "normal",
+                  wordWrap: "break-word",
+                  lineHeight: "1.3",
+                  fontSize: "13.5px",
+                }}
+              >
+                {item.productNameSnapshot}
+              </div>
+              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
+              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
+            </div>
+          );
+        })}
+
+        {hasTax && (
+          <div className="reference-row" style={{ top: `${taxTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
+            <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Tax</span>
+            <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(taxAmount!)}</span>
+          </div>
+        )}
+
+        {hasDiscount && (
+          <div className="reference-row" style={{ top: `${discountTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
+            <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Discount</span>
+            <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(discountAmount!)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="reference-field" style={{ ...cfg.total, top: `${totalTop}%`, justifyContent: "center" }}>{money(totalAmount)}</div>
+      {remarksStyle && <div className="reference-field" style={{ ...remarksStyle, top: `${parseFloat(String(remarksStyle.top)) + (layout.shift / REFERENCE_PAGE_HEIGHT) * 100}%`, justifyContent: "center" }}>{remarks}</div>}
+    </>
+  );
 }
 
 // ============================================================================
@@ -126,52 +230,17 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
         <div className="reference-field" style={{ ...cfg.billNo, justifyContent: "center" }}>{billNumber}</div>
         <div className="reference-field" style={{ ...cfg.date, justifyContent: "center" }}>{billDateValue}</div>
 
-        <div className="reference-items">
-          {rows.map((item, index) => {
-            const hasItem = !!item.productNameSnapshot;
-            return (
-            <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#0d3b36", fontSize: "12px", fontWeight: "600" }}>
-              <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{hasItem ? index + 1 : ""}</span>
-              <div 
-                className="reference-cell reference-cell-left" 
-                style={{ 
-                  left: cfg.cols.detail.left, 
-                  width: cfg.cols.detail.width,
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "flex-start",
-                  whiteSpace: "normal",
-                  wordWrap: "break-word",
-                  lineHeight: "1.3",
-                  fontSize: "13.5px"
-                }}
-              >
-                {item.productNameSnapshot}
-              </div>
-              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
-            </div>
-            );
-          })}
-          
-          {hasTax && (
-            <div className="reference-row" style={{ top: `${taxTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Tax</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(bill.taxAmount!)}</span>
-            </div>
-          )}
-
-          {hasDiscount && (
-            <div className="reference-row" style={{ top: `${discountTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Discount</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(bill.discountAmount!)}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
-        <div className="reference-field" style={{ ...cfg.remarks, justifyContent: "center" }}>{remarks}</div>
+        <ReferenceItems
+          rows={rows}
+          cfg={cfg}
+          color="#0d3b36"
+          includeSerial
+          taxAmount={bill.taxAmount}
+          discountAmount={bill.discountAmount}
+          totalAmount={bill.totalAmount}
+          remarks={remarks}
+          remarksStyle={cfg.remarks}
+        />
       </div>
     </article>
   );
@@ -242,52 +311,17 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
         <div className="reference-field" style={{ ...cfg.billNo, justifyContent: "center" }}>{billNumber}</div>
         <div className="reference-field" style={{ ...cfg.date, justifyContent: "center" }}>{billDateValue}</div>
 
-        <div className="reference-items">
-          {rows.map((item, index) => {
-            const hasItem = !!item.productNameSnapshot;
-            return (
-            <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#0d3b36", fontSize: "12px", fontWeight: "600" }}>
-              <span className="reference-cell" style={{ left: cfg.cols.sr.left, width: cfg.cols.sr.width }}>{hasItem ? index + 1 : ""}</span>
-              <div 
-                className="reference-cell reference-cell-left" 
-                style={{ 
-                  left: cfg.cols.detail.left, 
-                  width: cfg.cols.detail.width,
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "flex-start",
-                  whiteSpace: "normal",
-                  wordWrap: "break-word",
-                  lineHeight: "1.3",
-                  fontSize: "13.5px"
-                }}
-              >
-                {item.productNameSnapshot}
-              </div>
-              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
-            </div>
-            );
-          })}
-          
-          {hasTax && (
-            <div className="reference-row" style={{ top: `${taxTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Tax</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(bill.taxAmount!)}</span>
-            </div>
-          )}
-
-          {hasDiscount && (
-            <div className="reference-row" style={{ top: `${discountTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Discount</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(bill.discountAmount!)}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
-        <div className="reference-field" style={{ ...cfg.remarks, justifyContent: "center" }}>{remarks}</div>
+        <ReferenceItems
+          rows={rows}
+          cfg={cfg}
+          color="#0d3b36"
+          includeSerial
+          taxAmount={bill.taxAmount}
+          discountAmount={bill.discountAmount}
+          totalAmount={bill.totalAmount}
+          remarks={remarks}
+          remarksStyle={cfg.remarks}
+        />
       </div>
     </article>
   );
@@ -349,50 +383,15 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
         <div className="reference-field" style={{ ...cfg.billNo }}>{billNumber}</div>
         <div className="reference-field" style={{ ...cfg.date }}>{billDateValue}</div>
 
-        <div className="reference-items">
-          {rows.map((item, index) => {
-            const hasItem = !!item.productNameSnapshot;
-            return (
-            <div className="reference-row" key={item.id || index} style={{ top: `${cfg.tableStart + index * cfg.rowHeight}%`, height: `${cfg.rowHeight}%`, color: "#111", fontSize: "12px", fontWeight: "600" }}>
-              <div 
-                className="reference-cell reference-cell-left" 
-                style={{ 
-                  left: cfg.cols.detail.left, 
-                  width: cfg.cols.detail.width,
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "flex-start",
-                  whiteSpace: "normal",
-                  wordWrap: "break-word",
-                  lineHeight: "1.3",
-                  fontSize: "13.5px"
-                }}
-              >
-                {item.productNameSnapshot}
-              </div>
-              <span className="reference-cell" style={{ left: cfg.cols.qty.left, width: cfg.cols.qty.width }}>{hasItem && item.quantity ? item.quantity : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width }}>{hasItem && item.rate ? money(item.rate) : ""}</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>{hasItem && item.amount ? money(item.amount) : ""}</span>
-            </div>
-            );
-          })}
-          
-          {hasTax && (
-            <div className="reference-row" style={{ top: `${taxTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Tax</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(bill.taxAmount!)}</span>
-            </div>
-          )}
-
-          {hasDiscount && (
-            <div className="reference-row" style={{ top: `${discountTop}%`, height: `${cfg.summaryGap}%`, color: "#111", fontSize: "12px", fontWeight: "700" }}>
-              <span className="reference-cell reference-cell-left" style={{ left: cfg.cols.rate.left, width: cfg.cols.rate.width, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: "10px" }}>Discount</span>
-              <span className="reference-cell" style={{ left: cfg.cols.amount.left, width: cfg.cols.amount.width }}>Rs. {money(bill.discountAmount!)}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="reference-field" style={{ ...cfg.total, justifyContent: "center" }}>{money(bill.totalAmount)}</div>
+        <ReferenceItems
+          rows={rows}
+          cfg={cfg}
+          color="#111"
+          includeSerial={false}
+          taxAmount={bill.taxAmount}
+          discountAmount={bill.discountAmount}
+          totalAmount={bill.totalAmount}
+        />
       </div>
     </article>
   );

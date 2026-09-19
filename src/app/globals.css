@@ -89,6 +89,11 @@
   pointer-events: none;
 }
 
+.bill-pdf-renderer .reference-field,
+.bill-pdf-renderer .reference-cell {
+  transform: none;
+}
+
 .customer-name,
 .customer-place,
 .customer-phone,
@@ -148,7 +153,8 @@
   justify-content: flex-start !important;
   white-space: normal !important;
   word-wrap: break-word !important;
-  overflow: hidden !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
   line-height: 1.2 !important;
 }
 
