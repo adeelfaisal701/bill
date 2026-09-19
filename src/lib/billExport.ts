@@ -18,6 +18,8 @@ export async function createBillPdf(element: HTMLElement) {
       height: 1123,
       windowWidth: 794,
       windowHeight: 1123,
+      scrollX: 0,
+      scrollY: 0,
       backgroundColor: "#ffffff",
       useCORS: true,
       logging: false,

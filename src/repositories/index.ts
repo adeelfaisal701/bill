@@ -17,15 +17,15 @@ import { FirebaseBillRepository } from "./firebase/FirebaseBillRepository";
 import { FirebaseProductRepository } from "./firebase/FirebaseProductRepository";
 import { FirebaseBusinessRepository } from "./firebase/FirebaseBusinessRepository";
 import { FirebaseAuthRepository } from "./firebase/FirebaseAuthRepository";
+import { isSupabaseConfigured } from "./supabase/config";
+import { SupabaseBillRepository, SupabaseProductRepository } from "./supabase/http";
 
-const USE_CLOUD_WHEN_CONFIGURED = false;
-
-const useCloud = USE_CLOUD_WHEN_CONFIGURED && isFirebaseConfigured;
+const useCloud = isSupabaseConfigured;
 
 export const repositories: DataRepositories = useCloud
   ? {
-      bills: new FirebaseBillRepository(),
-      products: new FirebaseProductRepository(),
+  bills: new SupabaseBillRepository(),
+  products: new SupabaseProductRepository(),
       business: new FirebaseBusinessRepository(),
       auth: new FirebaseAuthRepository(),
       mode: "cloud",

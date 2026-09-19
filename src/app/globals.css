@@ -71,7 +71,8 @@
 
 .reference-page {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: fill; /* Forces exactly 100% 100% just like background-size */
@@ -80,7 +81,10 @@
 
 .reference-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 2;
   pointer-events: none;
 }
