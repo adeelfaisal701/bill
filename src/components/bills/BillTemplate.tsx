@@ -88,6 +88,7 @@ function ReferenceItems({
   totalAmount,
   remarks,
   remarksStyle,
+  footerFields,
 }: {
   rows: Bill["items"];
   cfg: ReferenceConfig;
@@ -98,6 +99,7 @@ function ReferenceItems({
   totalAmount: number;
   remarks?: string;
   remarksStyle?: React.CSSProperties;
+  footerFields?: (shift: number) => React.ReactNode;
 }) {
   const layout = useReferenceRowLayout(rows, cfg);
   const baseTop = (cfg.tableStart / 100) * REFERENCE_PAGE_HEIGHT;
@@ -161,6 +163,7 @@ function ReferenceItems({
 
       <div className="reference-field" style={{ ...cfg.total, top: `${totalTop}%`, justifyContent: "center" }}>{money(totalAmount)}</div>
       {remarksStyle && <div className="reference-field" style={{ ...remarksStyle, top: `${parseFloat(String(remarksStyle.top)) + (layout.shift / REFERENCE_PAGE_HEIGHT) * 100}%`, justifyContent: "center" }}>{remarks}</div>}
+      {footerFields?.(layout.shift)}
     </>
   );
 }
@@ -331,24 +334,29 @@ function ShareefBillRenderer({ bill, business }: BillTemplateProps) {
 // KING ENTERPRISE CONFIGURATION
 // ============================================================================
 const kingConfig = {
-  billNo: { left: "11.5%", top: "34.0%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  date: { left: "75%", top: "35.5%", width: "24%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  customer: { left: "17%", top: "35.5%", width: "40%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
-  total: { left: "71.5%", top: "88%", width: "24%", height: "3.5%", color: "#111", fontSize: "20px", fontWeight: "800", alignItems: "center" },
-  tableStart: 43.2,
-  rowHeight: 4.9,
-  summaryBottomTop: 82.5,
+  billNo: { left: "11.5%", top: "34.8%", width: "43%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  date: { left: "72.5%", top: "37.2%", width: "25%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  customer: { left: "11.5%", top: "37.2%", width: "51%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700" },
+  address: { left: "11.5%", top: "84.0%", width: "37%", height: "3.2%", color: "#fff", fontSize: "14px", fontWeight: "600" },
+  phone: { left: "11.5%", top: "88.5%", width: "37%", height: "3.2%", color: "#fff", fontSize: "18px", fontWeight: "700" },
+  total: { left: "65.5%", top: "86.8%", width: "30.5%", height: "4.5%", color: "#111", fontSize: "20px", fontWeight: "800", alignItems: "center" },
+  tableStart: 44.1,
+  rowHeight: 3.55,
+  summaryBottomTop: 81.3,
   summaryGap: 2.5,
   cols: {
-    detail: { left: "12%", width: "40%", isLeft: true },
-    qty: { left: "56%", width: "11%" },
-    rate: { left: "68%", width: "12%" },
-    amount: { left: "83%", width: "14%" }
+    sr: { left: "2.5%", width: "9.5%" },
+    detail: { left: "12%", width: "38%", isLeft: true },
+    qty: { left: "50%", width: "14.5%" },
+    rate: { left: "64.5%", width: "16.5%" },
+    amount: { left: "81%", width: "16.5%" }
   }
 };
 
 function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
   const lineOne = safeText(bill.partyName);
+  const address = safeText(bill.partyAddress);
+  const phone = safeText(bill.partyPhone);
   const billNumber = safeText(bill.billNumber) || String(bill.serialNumber || "");
   const billDateValue = bill.date ? billDate(bill.date) : "";
   const cfg = kingConfig;
@@ -379,18 +387,24 @@ function KingEnterpriseBillRenderer({ bill }: BillTemplateProps) {
     <article className="bill-sheet reference-sheet" aria-label="KING ENTERPRISE bill invoice">
       <div className="reference-page" style={{ backgroundImage: 'url("/king enterprise.jpeg")', backgroundSize: '100% 100%', backgroundPosition: 'center top', backgroundRepeat: 'no-repeat' }} aria-hidden="true"></div>
       <div className="reference-overlay">
-        <div className="reference-field" style={{ ...cfg.customer }}>{lineOne}</div>
-        <div className="reference-field" style={{ ...cfg.billNo }}>{billNumber}</div>
-        <div className="reference-field" style={{ ...cfg.date }}>{billDateValue}</div>
+        <div className="reference-field" style={{ ...cfg.customer, alignItems: "center", padding: 0 }}>{lineOne}</div>
+        <div className="reference-field" style={{ ...cfg.billNo, alignItems: "center", padding: 0 }}>{billNumber}</div>
+        <div className="reference-field" style={{ ...cfg.date, alignItems: "center", padding: 0 }}>{billDateValue}</div>
 
         <ReferenceItems
           rows={rows}
           cfg={cfg}
           color="#111"
-          includeSerial={false}
+          includeSerial
           taxAmount={bill.taxAmount}
           discountAmount={bill.discountAmount}
           totalAmount={bill.totalAmount}
+          footerFields={(shift) => (
+            <>
+              <div className="reference-field" style={{ ...cfg.address, top: `calc(${cfg.address.top} + ${shift}px)`, alignItems: "center", padding: 0 }}>{address}</div>
+              <div className="reference-field" style={{ ...cfg.phone, top: `calc(${cfg.phone.top} + ${shift}px)`, alignItems: "center", padding: 0 }}>{phone}</div>
+            </>
+          )}
         />
       </div>
     </article>
