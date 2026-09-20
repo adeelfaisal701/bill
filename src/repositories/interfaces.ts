@@ -7,6 +7,7 @@
 import type { Bill, BillType, BillTypeId, CreateBillInput, UpdateBillInput } from "@/types/bill";
 import type { CreateProductInput, Product, UpdateProductInput } from "@/types/product";
 import type { BusinessProfile } from "@/types/business";
+import type { CreateLedgerAccountInput, LedgerAccount, LedgerTransaction, UpdateLedgerAccountInput } from "@/types/ledger";
 import type { AppUser } from "@/types/user";
 
 export interface BillRepository {
@@ -40,6 +41,28 @@ export interface BusinessRepository {
   saveProfile(profile: BusinessProfile): Promise<BusinessProfile>;
 }
 
+export interface LedgerRepository {
+  listAccounts(): Promise<LedgerAccount[]>;
+  getAccount(id: string): Promise<LedgerAccount | null>;
+  getAccountBySlug(slug: string): Promise<LedgerAccount | null>;
+  createAccount(input: CreateLedgerAccountInput): Promise<LedgerAccount>;
+  updateAccount(id: string, patch: UpdateLedgerAccountInput): Promise<LedgerAccount>;
+  deleteAccount(id: string): Promise<void>;
+  listTransactions(accountId: string): Promise<LedgerTransaction[]>;
+  getSummary(accountId: string, fromDate?: string, toDate?: string): Promise<{
+    totalDebit: number;
+    totalCredit: number;
+    currentBalance: number;
+    totalTransactions: number;
+    transactions: LedgerTransaction[];
+  }>;
+  createTransaction(accountId: string, input: Omit<LedgerTransaction, "id" | "ledgerAccountId" | "createdAt" | "updatedAt">): Promise<LedgerTransaction>;
+  updateTransaction(id: string, patch: Partial<LedgerTransaction>): Promise<LedgerTransaction>;
+  deleteTransaction(id: string): Promise<void>;
+  syncBillToLedger(bill: Bill, accountId: string): Promise<void>;
+  removeBillFromLedger(bill: Bill, accountId: string): Promise<void>;
+}
+
 export interface AuthRepository {
   getCurrentUser(): Promise<AppUser | null>;
   signIn(email: string, password: string): Promise<AppUser>;
@@ -52,6 +75,7 @@ export interface DataRepositories {
   products: ProductRepository;
   business: BusinessRepository;
   auth: AuthRepository;
+  ledger?: LedgerRepository;
   /** "mock" = local browser storage, isolated dev data. "cloud" = real backend. */
   mode: "mock" | "cloud";
 }

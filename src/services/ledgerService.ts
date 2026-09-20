@@ -1,5 +1,6 @@
 import type { Bill } from "@/types/bill";
 import type { LedgerAccount, LedgerTransaction } from "@/types/ledger";
+import { repositories } from "@/repositories";
 import { readAll, writeAll } from "@/repositories/mock/storage";
 import { generateId } from "@/lib/utilities";
 
@@ -46,14 +47,17 @@ export function slugifyLedgerAccount(value: string): string {
 }
 
 export function listLedgerAccounts(): Promise<LedgerAccount[]> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.listAccounts();
   return Promise.resolve(loadLedgerAccounts());
 }
 
 export function getLedgerAccount(id: string): Promise<LedgerAccount | null> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.getAccount(id);
   return Promise.resolve(loadLedgerAccounts().find((account) => account.id === id) ?? null);
 }
 
 export function getLedgerAccountBySlug(slug: string): Promise<LedgerAccount | null> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.getAccountBySlug(slug);
   const normalized = decodeURIComponent(slug);
   const accounts = loadLedgerAccounts();
   const byId = accounts.find((account) => account.id === normalized);
@@ -65,6 +69,7 @@ export function getLedgerAccountBySlug(slug: string): Promise<LedgerAccount | nu
 }
 
 export function createLedgerAccount(input: Omit<LedgerAccount, "id" | "createdAt" | "updatedAt">): Promise<LedgerAccount> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.createAccount(input);
   const companyId = input.companyId?.trim();
   if (!companyId) {
     throw new Error("Please select a company/business.");
@@ -107,6 +112,7 @@ export function createLedgerAccount(input: Omit<LedgerAccount, "id" | "createdAt
 }
 
 export function updateLedgerAccount(id: string, patch: Partial<LedgerAccount>): Promise<LedgerAccount> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.updateAccount(id, patch);
   const accounts = loadLedgerAccounts();
   const idx = accounts.findIndex((account) => account.id === id);
   if (idx === -1) throw new Error("Ledger account not found.");
@@ -130,12 +136,14 @@ export function updateLedgerAccount(id: string, patch: Partial<LedgerAccount>): 
 }
 
 export function deleteLedgerAccount(id: string): Promise<void> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.deleteAccount(id);
   saveLedgerAccounts(loadLedgerAccounts().filter((account) => account.id !== id));
   saveLedgerTransactions(loadLedgerTransactions().filter((transaction) => transaction.ledgerAccountId !== id));
   return Promise.resolve();
 }
 
 export function listLedgerTransactionsForAccount(accountId: string): Promise<LedgerTransaction[]> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.listTransactions(accountId);
   return Promise.resolve(
     loadLedgerTransactions()
       .filter((transaction) => transaction.ledgerAccountId === accountId)
@@ -143,7 +151,8 @@ export function listLedgerTransactionsForAccount(accountId: string): Promise<Led
   );
 }
 
-export function getLedgerAccountSummary(accountId: string, fromDate?: string, toDate?: string): LedgerAccountSummary & { transactions: LedgerTransaction[] } {
+export function getLedgerAccountSummary(accountId: string, fromDate?: string, toDate?: string): Promise<LedgerAccountSummary & { transactions: LedgerTransaction[] }> {
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.getSummary(accountId, fromDate, toDate);
   const transactions = loadLedgerTransactions().filter((transaction) => transaction.ledgerAccountId === accountId);
   const filtered = transactions.filter((transaction) => {
     if (!fromDate && !toDate) return true;
@@ -164,13 +173,13 @@ export function getLedgerAccountSummary(accountId: string, fromDate?: string, to
   const totalCredit = adjusted.reduce((sum, tx) => sum + tx.credit, 0);
   const currentBalance = totalDebit - totalCredit;
 
-  return {
+  return Promise.resolve({
     totalDebit,
     totalCredit,
     currentBalance,
     totalTransactions: adjusted.length,
     transactions: adjusted,
-  };
+  });
 }
 
 export function refreshAccountBalances(accountId: string, transactionsOverride?: LedgerTransaction[]): void {
@@ -191,6 +200,7 @@ export function refreshAccountBalances(accountId: string, transactionsOverride?:
 
 export function syncBillToLedger(bill: Bill, accountId?: string): Promise<void> {
   if (!accountId) return Promise.resolve();
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.syncBillToLedger(bill, accountId);
 
   const allTransactions = loadLedgerTransactions();
   const accountTransactions = allTransactions.filter((transaction) => transaction.ledgerAccountId === accountId);
@@ -221,6 +231,7 @@ export function syncBillToLedger(bill: Bill, accountId?: string): Promise<void> 
 
 export function removeBillFromLedger(bill: Bill, accountId?: string): Promise<void> {
   if (!accountId) return Promise.resolve();
+  if (repositories.mode === "cloud" && repositories.ledger) return repositories.ledger.removeBillFromLedger(bill, accountId);
   const allTransactions = loadLedgerTransactions();
   const filtered = allTransactions.filter((transaction) => !(transaction.billId === bill.id && transaction.ledgerAccountId === accountId));
   saveLedgerTransactions(filtered);
@@ -243,6 +254,6 @@ export function reconcileLedgerAfterBillChange(previousBill: Bill | null, nextBi
   return Promise.resolve();
 }
 
-export function getAccountLedgerForView(accountId: string, fromDate?: string, toDate?: string): LedgerAccountSummary & { transactions: LedgerTransaction[] } {
+export function getAccountLedgerForView(accountId: string, fromDate?: string, toDate?: string): Promise<LedgerAccountSummary & { transactions: LedgerTransaction[] }> {
   return getLedgerAccountSummary(accountId, fromDate, toDate);
 }

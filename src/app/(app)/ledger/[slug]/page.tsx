@@ -13,7 +13,7 @@ import { formatCurrency, formatDate } from "@/lib/utilities";
 import type { LedgerAccount, LedgerTransaction } from "@/types/ledger";
 import type { BusinessProfile } from "@/types/business";
 
-type LedgerSummary = ReturnType<typeof getLedgerAccountSummary>;
+type LedgerSummary = Awaited<ReturnType<typeof getLedgerAccountSummary>>;
 
 type Filters = { query: string; transactionType: string; paymentMode: string; fromDate: string; toDate: string };
 
@@ -37,7 +37,8 @@ export default function LedgerDetailPage({ params }: { params: Promise<{ slug: s
     getBusinessProfile().then(setBusiness);
     getLedgerAccountBySlug(slug).then((value) => {
       setAccount(value);
-      setSummary(value ? getLedgerAccountSummary(value.id) : null);
+      if (value) getLedgerAccountSummary(value.id).then(setSummary);
+      else setSummary(null);
     });
   }, [slug]);
 

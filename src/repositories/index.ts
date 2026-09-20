@@ -18,7 +18,7 @@ import { FirebaseProductRepository } from "./firebase/FirebaseProductRepository"
 import { FirebaseBusinessRepository } from "./firebase/FirebaseBusinessRepository";
 import { FirebaseAuthRepository } from "./firebase/FirebaseAuthRepository";
 import { isSupabaseConfigured } from "./supabase/config";
-import { SupabaseBillRepository, SupabaseProductRepository } from "./supabase/http";
+import { SupabaseBillRepository, SupabaseBusinessRepository, SupabaseLedgerRepository, SupabaseProductRepository } from "./supabase/http";
 
 const useCloud = isSupabaseConfigured;
 
@@ -26,8 +26,9 @@ export const repositories: DataRepositories = useCloud
   ? {
   bills: new SupabaseBillRepository(),
   products: new SupabaseProductRepository(),
-      business: new FirebaseBusinessRepository(),
+  business: new SupabaseBusinessRepository(),
       auth: new FirebaseAuthRepository(),
+  ledger: new SupabaseLedgerRepository(),
       mode: "cloud",
     }
   : {
