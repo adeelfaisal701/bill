@@ -193,7 +193,7 @@ const alGhaniConfig = {
   customer: { left: "22.5%", top: "29.8%", width: "41.5%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
   place: { left: "15%", top: "32.4%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
   phone: { left: "15%", top: "35.6%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
-  total: { left: "76%", top: "74.7%", width: "18.5%", height: "3.5%", color: "#ffffff", fontSize: "22px", fontWeight: "800", alignItems: "center" },
+  total: { left: "82%", top: "74.7%", width: "15%", height: "3.5%", color: "#ffffff", fontSize: "22px", fontWeight: "800", alignItems: "center" },
   remarks: { left: "52%", top: "80.6%", width: "13%", height: "2.5%", color: "#0d3b36", fontSize: "10px", fontWeight: "400", alignItems: "center" },
   tableStart: 41.8,
   rowHeight: 2.55,
