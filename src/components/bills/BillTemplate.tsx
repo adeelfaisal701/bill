@@ -188,23 +188,23 @@ function ReferenceItems({
 // AL GHANI TRADERS CONFIGURATION
 // ============================================================================
 const alGhaniConfig = {
-  billNo: { left: "78%", top: "30.5%", width: "17%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
-  date: { left: "78%", top: "34.1%", width: "17%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
-  customer: { left: "22.5%", top: "29.8%", width: "41.5%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
-  place: { left: "15%", top: "32.4%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
-  phone: { left: "15%", top: "35.6%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
+  billNo: { left: "74.2%", top: "29.75%", width: "22%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
+  date: { left: "74.2%", top: "33.15%", width: "22%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
+  customer: { left: "22.5%", top: "28.95%", width: "41.5%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
+  place: { left: "15%", top: "31.75%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
+  phone: { left: "15%", top: "34.65%", width: "42%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
   total: { left: "82%", top: "74.7%", width: "15%", height: "3.5%", color: "#ffffff", fontSize: "22px", fontWeight: "800", alignItems: "center" },
   remarks: { left: "52%", top: "80.6%", width: "13%", height: "2.5%", color: "#0d3b36", fontSize: "10px", fontWeight: "400", alignItems: "center" },
-  tableStart: 41.8,
+  tableStart: 41,
   rowHeight: 2.55,
-  summaryBottomTop: 71.5,
+  summaryBottomTop: 72.3,
   summaryGap: 2.5,
   cols: {
-    sr: { left: "3%", width: "9%" },
-    detail: { left: "14%", width: "39%", isLeft: true },
-    qty: { left: "54%", width: "12%" },
-    rate: { left: "66%", width: "12.5%" },
-    amount: { left: "78.5%", width: "18%" }
+    sr: { left: "2.4%", width: "9.6%" },
+    detail: { left: "12.1%", width: "42.2%", isLeft: true },
+    qty: { left: "54.4%", width: "11.5%" },
+    rate: { left: "66%", width: "13.5%" },
+    amount: { left: "79.7%", width: "17.8%" }
   }
 };
 
@@ -254,29 +254,29 @@ function AlGhaniBillRenderer({ bill, business }: BillTemplateProps) {
 // SHAREEF TRADERS CONFIGURATION
 // ============================================================================
 const shareefConfig = {
-  billNo: { left: "73.5%", top: "29.8%", width: "23%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
-  date: { left: "73.5%", top: "33.5%", width: "23%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
-  customer: { left: "14%", top: "40.1%", width: "72%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
-  place: { left: "14%", top: "42.7%", width: "72%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
-  phone: { left: "14%", top: "45.3%", width: "72%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
-  total: { left: "74.5%", top: "89.1%", width: "23.5%", height: "3.1%", color: "#111", fontSize: "20px", fontWeight: "800", alignItems: "center" },
+  billNo: { left: "73.5%", top: "27.6%", width: "23%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
+  date: { left: "73.5%", top: "32.1%", width: "23%", height: "3%", color: "#111", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
+  customer: { left: "14%", top: "39.5%", width: "72%", height: "3%", color: "#0d3b36", fontSize: "14px", fontWeight: "700", alignItems: "center", padding: 0 },
+  place: { left: "14%", top: "41.9%", width: "72%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
+  phone: { left: "14%", top: "44.7%", width: "72%", height: "3%", color: "#0d3b36", fontSize: "13px", fontWeight: "600", alignItems: "center", padding: 0 },
+  total: { left: "74.5%", top: "87.7%", width: "23.5%", height: "3.1%", color: "#111", fontSize: "20px", fontWeight: "800", alignItems: "center" },
   remarks: { left: "54%", top: "80.6%", width: "11%", height: "2.5%", color: "#0d3b36", fontSize: "10px", fontWeight: "400", alignItems: "center" },
   tableStart: 51.5,
   rowHeight: 2.55,
-  summaryBottomTop: 79.5,
+  summaryBottomTop: 79.2,
   summaryGap: 2.5,
   summary: {
-    subtotal: { left: "74.5%", top: "79.8%", width: "23.5%", height: "2.8%", alignItems: "center", padding: 0 },
-    discount: { left: "74.5%", top: "82.7%", width: "23.5%", height: "2.8%", alignItems: "center", padding: 0 },
-    tax: { left: "74.5%", top: "85.6%", width: "23.5%", height: "2.8%", alignItems: "center", padding: 0 },
-    total: { left: "74.5%", top: "88.2%", width: "23.5%", height: "3.1%", alignItems: "center", padding: 0 },
+    subtotal: { left: "74.5%", top: "79.2%", width: "23.5%", height: "2.8%", alignItems: "center", padding: 0 },
+    discount: { left: "74.5%", top: "82%", width: "23.5%", height: "2.8%", alignItems: "center", padding: 0 },
+    tax: { left: "74.5%", top: "84.8%", width: "23.5%", height: "2.8%", alignItems: "center", padding: 0 },
+    total: { left: "74.5%", top: "87.6%", width: "23.5%", height: "3.1%", alignItems: "center", padding: 0 },
   },
   cols: {
-    sr: { left: "3.5%", width: "9.5%" },
-    detail: { left: "10%", width: "46.2%", isLeft: true },
-    qty: { left: "56.3%", width: "12.6%" },
-    rate: { left: "68.9%", width: "14%" },
-    amount: { left: "83.1%", width: "14.7%" }
+    sr: { left: "2.2%", width: "7.7%" },
+    detail: { left: "10.2%", width: "47.2%", isLeft: true },
+    qty: { left: "57.7%", width: "12.4%" },
+    rate: { left: "70.4%", width: "13.3%" },
+    amount: { left: "83.8%", width: "14.2%" }
   }
 };
 
