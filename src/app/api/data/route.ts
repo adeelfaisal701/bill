@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     if (resource === "bills") return NextResponse.json({ data: await data.listBills() });
     if (resource === "bill") return NextResponse.json({ data: await data.getBill(url.searchParams.get("id") ?? "") });
     if (resource === "bill-types") return NextResponse.json({ data: await data.getBillTypes() });
-    if (resource === "next-bill-number") return NextResponse.json({ data: await data.getNextBillNumber() });
+    if (resource === "next-bill-number") return NextResponse.json({ data: await data.getNextBillNumber(url.searchParams.get("billType") as Parameters<typeof data.getNextBillNumber>[0]) });
     if (resource === "business-profile") return NextResponse.json({ data: await data.getBusinessProfile() });
     if (resource === "ledger-accounts") return NextResponse.json({ data: await data.listLedgerAccounts() });
     if (resource === "ledger-account") return NextResponse.json({ data: await data.getLedgerAccount(url.searchParams.get("id") ?? "") });

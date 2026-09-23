@@ -1,5 +1,5 @@
 import { repositories } from "@/repositories";
-import type { Bill, BillFilters, CreateBillInput, UpdateBillInput } from "@/types/bill";
+import type { Bill, BillFilters, BillTypeId, CreateBillInput, UpdateBillInput } from "@/types/bill";
 import type { Product } from "@/types/product";
 import { isSameDay, isThisWeek, isThisMonth, isWithinRange } from "@/lib/utilities";
 import { validateBillDraft } from "@/lib/validation";
@@ -17,8 +17,8 @@ export async function getBillTypes() {
   return repositories.bills.getBillTypes();
 }
 
-export async function getNextBillNumber(): Promise<number> {
-  return repositories.bills.getNextBillNumber();
+export async function getNextBillNumber(billType: BillTypeId): Promise<number> {
+  return repositories.bills.getNextBillNumber(billType);
 }
 
 export function filterBills(bills: Bill[], filters: BillFilters): Bill[] {

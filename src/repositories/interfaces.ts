@@ -17,10 +17,10 @@ export interface BillRepository {
   updateBill(id: string, input: UpdateBillInput): Promise<Bill>;
   deleteBill(id: string): Promise<void>;
   getBillTypes(): Promise<BillType[]>;
-  getNextBillNumber(): Promise<number>;
+  getNextBillNumber(billType: BillTypeId): Promise<number>;
   /**
    * Atomically reserves and returns the next serial number for a bill type.
-  * The number is global across all bill types. The mock implementation is
+  * The number is independent for each bill type. The mock implementation is
   * persistent local storage; a real cloud backend
    * MUST perform this as a server-side transaction so concurrent devices
    * never receive the same number (see docs/ARCHITECTURE.md).

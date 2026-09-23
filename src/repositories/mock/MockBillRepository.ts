@@ -3,10 +3,11 @@ import type { Bill, BillType, BillTypeId, CreateBillInput, UpdateBillInput } fro
 import { readAll, writeAll } from "./storage";
 import { SEED_BILLS, SEED_BILL_TYPES } from "./mockData";
 import { generateId } from "@/lib/utilities";
+import { formatBillNumber } from "@/lib/billNumber";
 
 const BILLS_KEY = "bills";
 const BILL_TYPES_KEY = "billTypes";
-const GLOBAL_BILL_NUMBER_KEY = "globalBillNumber";
+const BILL_NUMBER_KEY = "billNumbers";
 
 function loadBills(): Bill[] {
   const bills = readAll<Bill[]>(BILLS_KEY, SEED_BILLS);
@@ -39,13 +40,14 @@ function saveBillTypes(types: BillType[]): void {
   writeAll(BILL_TYPES_KEY, types);
 }
 
-function calculateNextBillNumber(): number {
-  const storedNext = readAll<number | null>(GLOBAL_BILL_NUMBER_KEY, null);
+function calculateNextBillNumber(billType: BillTypeId): number {
+  const storedNext = readAll<Record<BillTypeId, number> | null>(BILL_NUMBER_KEY, null)?.[billType];
   const highestExistingNumber = loadBills().reduce((highest, bill) => {
+    if (bill.billType !== billType) return highest;
     const billNumber = Number(bill.billNumber ?? bill.serialNumber);
     return Number.isInteger(billNumber) && billNumber > highest ? billNumber : highest;
   }, 0);
-  return Math.max(storedNext ?? 1, highestExistingNumber + 1);
+  return Math.max(3001, storedNext ?? 1, highestExistingNumber + 1);
 }
 
 // Simulates network latency so loading states are visible/testable.
@@ -91,7 +93,7 @@ export class MockBillRepository implements BillRepository {
       id: billId,
       billType: input.billType,
       serialNumber,
-      billNumber: String(serialNumber),
+      billNumber: formatBillNumber(input.billType, serialNumber),
       partyName: input.partyName.trim(),
       partyPhone: input.partyPhone?.trim() || undefined,
       partyAddress: input.partyAddress?.trim() || undefined,
@@ -182,14 +184,14 @@ export class MockBillRepository implements BillRepository {
     return delay(loadBillTypes());
   }
 
-  async getNextBillNumber(): Promise<number> {
-    return calculateNextBillNumber();
+  async getNextBillNumber(billType: BillTypeId): Promise<number> {
+    return calculateNextBillNumber(billType);
   }
 
   async reserveNextSerialNumber(billType: BillTypeId): Promise<number> {
-    void billType;
-    const nextSerial = calculateNextBillNumber();
-    writeAll(GLOBAL_BILL_NUMBER_KEY, nextSerial + 1);
+    const nextSerial = calculateNextBillNumber(billType);
+    const numbers = readAll<Partial<Record<BillTypeId, number>>>(BILL_NUMBER_KEY, {});
+    writeAll(BILL_NUMBER_KEY, { ...numbers, [billType]: nextSerial + 1 });
     return delay(nextSerial, 0);
   }
 }

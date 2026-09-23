@@ -12,6 +12,7 @@ import { BillItemFormRow, type DraftBillItem } from "@/components/bills/BillItem
 import { useProducts } from "@/hooks/useProducts";
 import { useToast } from "@/context/ToastContext";
 import { createBill, getNextBillNumber } from "@/services/billService";
+import { formatBillNumber } from "@/lib/billNumber";
 import { listLedgerAccounts } from "@/services/ledgerService";
 import { formatCurrency, generateId, todayIso } from "@/lib/utilities";
 import { validateBillDraft } from "@/lib/validation";
@@ -61,7 +62,7 @@ export default function CreateBillFoundationPage({
 
   useEffect(() => {
     getBusinessProfile().then(setBusiness);
-    getNextBillNumber().then(setNextBillNumber);
+    getNextBillNumber(billType).then(setNextBillNumber);
     listLedgerAccounts().then((accounts) => {
       setLedgerAccounts(accounts);
       if (accounts[0]) setLedgerAccountId(accounts[0].id);
@@ -88,6 +89,7 @@ export default function CreateBillFoundationPage({
     partyPhone: partyPhone || undefined,
     partyAddress: partyAddress || undefined,
     date: new Date(date).toISOString(),
+    billNumber: nextBillNumber ? formatBillNumber(billType, nextBillNumber) : undefined,
     items: items.map((item, index) => ({
       id: item.key,
       billId: "preview",
@@ -196,7 +198,7 @@ export default function CreateBillFoundationPage({
               <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium text-ink-700">Bill Number</span>
                 <div className="rounded-xl border border-ink-200 bg-ink-50 px-4 py-3 text-[15px] text-ink-500">
-                  {nextBillNumber ?? "Loading..."}
+                  {nextBillNumber ? formatBillNumber(billType, nextBillNumber) : "Loading..."}
                 </div>
               </div>
               <Input

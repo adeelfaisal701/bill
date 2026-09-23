@@ -40,7 +40,7 @@ export class SupabaseBillRepository implements BillRepository {
   updateBill(id: string, input: UpdateBillInput): Promise<Bill> { return request<Bill>({ resource: "update-bill", id, patch: input }); }
   async deleteBill(id: string): Promise<void> { await request({ resource: "delete-bill", id }); }
   getBillTypes(): Promise<BillType[]> { return get<BillType[]>("bill-types"); }
-  getNextBillNumber(): Promise<number> { return get<number>("next-bill-number"); }
+  getNextBillNumber(billType: BillTypeId): Promise<number> { return get<number>("next-bill-number", { billType }); }
   reserveNextSerialNumber(billType: BillTypeId): Promise<number> {
     return request<number>({ resource: "reserve-serial", input: { billType } });
   }

@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Bill, BillItem, BillType, BillTypeId, CreateBillInput, UpdateBillInput } from "@/types/bill";
+import { formatBillNumber } from "@/lib/billNumber";
 import type { BusinessProfile } from "@/types/business";
 import type { CreateLedgerAccountInput, LedgerAccount, LedgerAccountType, LedgerTransaction, OpeningBalanceType, UpdateLedgerAccountInput } from "@/types/ledger";
 import type { CreateProductInput, Product, UpdateProductInput } from "@/types/product";
@@ -285,13 +286,13 @@ export async function getBillTypes(): Promise<BillType[]> {
   return rows.map((row) => ({ id: row.id, name: row.name, formatKey: row.format_key, lastSerialNumber: row.last_serial_number }));
 }
 
-export async function getNextBillNumber(): Promise<number> {
-  const result = await getAdminClient().rpc("get_next_bill_number", { p_business_id: BUSINESS_ID });
+export async function getNextBillNumber(billType: BillTypeId): Promise<number> {
+  const result = await getAdminClient().rpc("get_next_bill_number", { p_business_id: BUSINESS_ID, p_bill_type_id: billType });
   return await ensure(result) as number;
 }
 
-export async function reserveNextSerialNumber(_billType: BillTypeId): Promise<number> {
-  const result = await getAdminClient().rpc("reserve_global_bill_number", { p_business_id: BUSINESS_ID });
+export async function reserveNextSerialNumber(billType: BillTypeId): Promise<number> {
+  const result = await getAdminClient().rpc("reserve_bill_number", { p_business_id: BUSINESS_ID, p_bill_type_id: billType });
   return await ensure(result) as number;
 }
 
@@ -321,7 +322,7 @@ export async function createBill(input: CreateBillInput): Promise<Bill> {
       id: billId,
       bill_type_id: input.billType,
       serial_number: serialNumber,
-      bill_number: String(serialNumber),
+      bill_number: formatBillNumber(input.billType, serialNumber),
       ledger_account_id: input.ledgerAccountId ?? null,
       party_name: input.partyName.trim(),
       party_phone: input.partyPhone?.trim() || null,
