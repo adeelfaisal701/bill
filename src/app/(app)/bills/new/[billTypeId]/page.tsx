@@ -162,8 +162,13 @@ export default function CreateBillFoundationPage({
       });
       show("Bill saved successfully.", "success");
       router.push(`/bills/${bill.id}`);
-    } catch {
-      show("Unable to save bill. Please try again.", "error");
+    } catch (error) {
+      show(
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : "Unable to save bill. Please try again.",
+        "error"
+      );
     } finally {
       setSaving(false);
     }

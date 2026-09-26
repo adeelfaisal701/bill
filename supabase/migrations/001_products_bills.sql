@@ -39,6 +39,7 @@ create table if not exists bill_types (
   name text not null,
   format_key text not null,
   last_serial_number bigint not null default 0,
+  updated_at timestamptz not null default now(),
   primary key (business_id, id)
 );
 
